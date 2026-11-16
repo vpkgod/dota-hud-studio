@@ -1,0 +1,12 @@
+__pycache__/
+# Личные данные и рабочие файлы: на сайт не попадают
+cache/
+uploads/
+output/
+projects/
+backups/
+tests/js/parity.json
+
+# Заметки для работы с Claude: в репозиторий не попадают
+CLAUDE.md
+ЖУРНАЛ.md

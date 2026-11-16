@@ -1,0 +1,386 @@
+/* Шрифты Dota: Radiance — весь текст, RadianceM — цифры одинаковой ширины (monospaceNumbersFont), Reaver — titleFont. */
+@font-face { font-family: 'Radiance'; font-weight: 300; src: url('../fonts/dota/radiance-light.woff2') format('woff2'); }
+@font-face { font-family: 'RadianceM'; font-weight: 300; src: url('../fonts/dota/radiancem-light.woff2') format('woff2'); }
+@font-face { font-family: 'Radiance'; font-weight: 400; src: url('../fonts/dota/radiance-regular.woff2') format('woff2'); }
+@font-face { font-family: 'Radiance'; font-weight: 600; src: url('../fonts/dota/radiance-semibold.woff2') format('woff2'); }
+@font-face { font-family: 'Radiance'; font-weight: 700; src: url('../fonts/dota/radiance-bold.woff2') format('woff2'); }
+@font-face { font-family: 'Radiance'; font-weight: 900; src: url('../fonts/dota/radiance-black.woff2') format('woff2'); }
+@font-face { font-family: 'RadianceM'; font-weight: 400; src: url('../fonts/dota/radiancem-regular.woff2') format('woff2'); }
+@font-face { font-family: 'RadianceM'; font-weight: 600; src: url('../fonts/dota/radiancem-semibold.woff2') format('woff2'); }
+@font-face { font-family: 'RadianceM'; font-weight: 700; src: url('../fonts/dota/radiancem-bold.woff2') format('woff2'); }
+@font-face { font-family: 'Reaver'; font-weight: 600; src: url('../fonts/dota/reaver-semibold.woff2') format('woff2'); }
+@font-face { font-family: 'Reaver'; font-weight: 700; src: url('../fonts/dota/reaver-bold.woff2') format('woff2'); }
+
+/* Сцена 1920×1080: размеры взяты из оригинального CSS Dota 2. */
+.stage { position: absolute; left: 0; top: 0; height: 1080px; transform-origin: 0 0; overflow: hidden; user-select: none; touch-action: none; font-family: "Radiance", "Geist", system-ui, sans-serif; color: #fff; }
+.stage .mono { font-family: "RadianceM", "Radiance", "Geist", sans-serif; }
+.stage .img { position: absolute; inset: 0; background-image: var(--i); background-size: var(--s); background-position: center; background-repeat: no-repeat; opacity: var(--o); pointer-events: none; }
+.stage [data-b]:hover, .stage [data-c]:hover { cursor: pointer; }
+.stage .hover { outline: 2px solid #ffd76e; outline-offset: -1px; }
+.stage .sel { outline: 2px solid #5dd0ff; outline-offset: -1px; }
+.stage.panning, .stage.panning * { cursor: grabbing !important; }
+.world { position: absolute; inset: 0; background: #10161c center / cover no-repeat; }
+.custom-world .world { background-image: var(--world) !important; }
+.hud { position: absolute; inset: 0; filter: hue-rotate(var(--fx-hue)) saturate(var(--fx-sat)) brightness(var(--fx-bright)) contrast(var(--fx-contrast)); }
+.hud b, .hud em { font-style: normal; }
+
+/* Верхняя панель: размеры из dota_hud_top_bar.css */
+.topbar { position: absolute; top: 0; left: 50%; width: 1640px; margin-left: -820px; height: 80px; display: var(--top-show); opacity: var(--top-opacity); transform: var(--top-offset) scale(var(--top-scale)); transform-origin: top center; font-variant-numeric: tabular-nums; }
+.clock { position: absolute; left: 50%; top: 0; margin-left: -45px; width: 90px; height: 46px; z-index: 2; }
+.tb-daynight { position: absolute; left: 50%; top: 2px; width: 23px; height: 23px; margin-left: -11px; }
+.clock b { position: absolute; inset: auto 0 4px; text-align: center; font-size: var(--top-timeSize); line-height: 1.1; color: var(--top-time); letter-spacing: 1px; text-shadow: var(--top-timeOutline); }
+.tb-team { position: absolute; top: 0; display: flex; height: 40px; align-items: flex-start; }
+.tb-team.radiant { right: calc(50% + 40px); }
+.tb-team.dire { left: calc(50% + 40px); }
+.tb-bg { position: absolute; top: 0; width: 408px; height: 40px; overflow: hidden; z-index: -1; }
+.tb-bg .img { bottom: auto; height: 80px; background-position: right top; }
+.radiant .tb-bg { right: -40px; }
+.dire .tb-bg { left: -40px; transform: scaleX(-1); }
+.tb-slot { position: relative; flex: none; width: var(--top-heroW); height: 56px; }
+.radiant .tb-slot { margin-left: -4px; }
+.dire .tb-slot { margin-right: -4px; }
+.tb-face { position: absolute; left: 0; top: 0; width: 100%; height: 40px; }
+.radiant .tb-face { clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 100%, 6px 100%); }
+.dire .tb-face { clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); }
+.tb-color { position: absolute; left: 0; top: 0; width: 100%; height: 4px; z-index: 2; }
+.tb-hero { position: absolute; left: 0; top: 4px; display: block; width: 100%; height: 36px; object-fit: cover; border-radius: var(--top-radius); }
+.tb-shade { position: absolute; inset: 4px 0 0; background: linear-gradient(#000 0, #000a 3%, #0000 10%, #0000 91%, #0006 95%, #000a); }
+.tb-ult { position: absolute; left: 50%; top: 35px; width: 9px; height: 9px; margin-left: -5px; transform: rotate(45deg); background: #23272b; border: 1px solid #000; z-index: 3; }
+.tb-ult.ready { background: #37d14a; box-shadow: 0 0 4px #37d14a; }
+.dire .tb-ult { display: none; }
+/* Полоски героев видны в игре, пока зажат Alt */
+.tb-hp, .tb-mp { position: absolute; left: 6px; width: 60px; height: 8px; display: none; }
+.dire .tb-hp, .dire .tb-mp { left: auto; right: 6px; }
+.tb-hp { top: 39px; background: linear-gradient(#17200d, #222e13 20%, #1e2911 50%, #17200d); }
+.tb-mp { top: 47px; background: linear-gradient(#101932, #172447 20%, #162244 50%, #101932); }
+.alt-held .tb-hp, .alt-held .tb-mp, .alt-peek .tb-hp, .alt-peek .tb-mp { display: block; }
+.tb-hp > i, .tb-mp > i { display: block; height: 100%; }
+.radiant .tb-hp > i { background: var(--top-hpRadiant); }
+.dire .tb-hp > i { background: var(--top-hpDire); }
+.tb-mp > i { background: linear-gradient(#5a86ea, #3c63c9 50%, #2b4a9f); }
+.tb-score { position: relative; width: 58px; height: 38px; margin-top: 7px; text-align: center; font-size: var(--top-scoreSize); line-height: 1.15; color: var(--top-score); text-shadow: var(--top-scoreOutline); z-index: 5; }
+.radiant .tb-score { margin-right: 4px; }
+.dire .tb-score { margin-left: 4px; }
+
+/* Мини-карта, таймеры Рошана и мучителя, скан и глиф: hud_reborn.css и их собственные стили */
+.mm-block { position: absolute; left: 0; bottom: 0; width: var(--minimap-size); height: var(--minimap-size); display: var(--minimap-show); opacity: var(--minimap-opacity); transform: var(--minimap-offset); }
+.mm { position: absolute; inset: 0; overflow: hidden; border-radius: var(--minimap-radius); }
+/* Карта: пиксельная (см. pixelateMap в preview.js), туман войны — всё вне обзора Света темнее и серее. */
+.mm-map { position: absolute; inset: 2px; background: #11161a center / 100% 100% no-repeat; image-rendering: pixelated; overflow: hidden; }
+.mm-fog { position: absolute; inset: 0; background: #0a0d12; opacity: .62; mix-blend-mode: multiply;
+  -webkit-mask-image: radial-gradient(circle at 14% 84%, #0000 30%, #000 36%), radial-gradient(circle at 30% 64%, #0000 14%, #000 19%),
+    radial-gradient(circle at 9% 56%, #0000 7%, #000 11%), radial-gradient(circle at 47% 86%, #0000 7%, #000 11%), radial-gradient(circle at 29% 90%, #0000 7%, #000 11%);
+  -webkit-mask-composite: source-in;
+  mask-image: radial-gradient(circle at 14% 84%, #0000 30%, #000 36%), radial-gradient(circle at 30% 64%, #0000 14%, #000 19%),
+    radial-gradient(circle at 9% 56%, #0000 7%, #000 11%), radial-gradient(circle at 47% 86%, #0000 7%, #000 11%), radial-gradient(circle at 29% 90%, #0000 7%, #000 11%);
+  mask-composite: intersect; }
+.mm-mark { position: absolute; width: 9px; height: 9px; margin: -5px 0 0 -5px; box-shadow: 0 0 0 1px #000a; }
+.mm-mark.r { background: #2fe02f; }
+.mm-mark.d { background: #f01414; }
+.mm-camp { position: absolute; width: 9px; height: 9px; margin: -5px 0 0 -5px; background: #b8711f; filter: drop-shadow(0 0 1px #000); -webkit-mask-size: 100% 100%; mask-size: 100% 100%; }
+.mm-unit { position: absolute; width: 34px; height: 34px; margin: -17px 0 0 -17px; }
+.mm-unit img { position: absolute; left: 2px; top: 2px; width: 30px; height: 30px; image-rendering: pixelated; }
+.mm-ring { position: absolute; inset: -5px; transform: rotate(var(--turn)); -webkit-mask-size: 100% 100%; mask-size: 100% 100%; }
+.mm-unit.enemy .mm-ring { background: #e8261c; }
+.mm-unit.ally .mm-ring { background: #26c22c; }
+.mm-unit.self .mm-ring { background: #2fd6e0; }
+.mm-unit.self::before { content: ''; position: absolute; inset: -9px; border-radius: 50%; border: 2px solid #3fd3c9aa; box-shadow: 0 0 6px #3fd3c988; }
+.mm-side { position: absolute; left: var(--minimap-size); bottom: 0; width: 74px; height: 280px; pointer-events: none; }
+.mm-timer { position: absolute; left: 0; width: 70px; height: 70px; background-size: cover; }
+.mm-timer.roshan { bottom: 162px; }
+.mm-timer.tormentor { bottom: 93px; }
+.mm-timer span { position: absolute; left: 6px; width: 42px; height: 42px; display: grid; place-items: center; overflow: hidden; border-radius: 50%; background: #000; box-shadow: -1px 1px 4px -0.5px rgba(241, 247, 255, .06); }
+.mm-timer.roshan span { top: 23px; }
+.mm-timer.tormentor span { top: 4px; }
+.mm-timer img { width: 36px; height: 36px; object-fit: cover; }
+.mm-timer.tormentor img { width: 40px; height: 40px; }
+.mm-timer span i { position: absolute; inset: 0; border-radius: 50%; border: 1.8px solid #7f8fa7; opacity: .8; background: radial-gradient(circle at 50% 45%, #a5ff8422, #afff8417 50%, #fff0 58%); }
+.glyph { position: absolute; left: var(--minimap-size); bottom: 0; width: 74px; height: 280px; display: var(--glyph-show); opacity: var(--glyph-opacity); transform: var(--glyph-offset); }
+.mm-round { position: absolute; right: 24px; width: 44px; height: 44px; }
+.mm-round.scan { bottom: 50px; }
+.mm-round.fort { bottom: 6px; }
+.mm-round img { display: block; width: 100%; height: 100%; }
+.mm-round b { position: absolute; right: 0; bottom: 2px; width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; background: linear-gradient(#444, #000); box-shadow: 2px 2px 4px #000; font-size: 13px; }
+
+/* Баффы */
+.buffs { position: absolute; left: calc(50% - var(--buffs-size) - 3px); bottom: 184px; display: flex; gap: 6px; visibility: var(--buffs-show-vis); opacity: var(--buffs-opacity); transform: var(--buffs-offset) scale(var(--buffs-scale)); transform-origin: bottom left; }
+.buff { position: relative; flex: none; width: var(--buffs-size); height: var(--buffs-size); border-radius: 50%; border: 3px solid #5fc23a; background: #000; box-shadow: 0 0 0 1px #000, 0 0 4px #000c; }
+.buff.bad { border-color: #e03a2b; }
+.buff img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.buff b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 20px; font-weight: 700; text-shadow: 0 0 4px #000, 0 0 4px #000, 0 0 4px #000; }
+
+/* Центр. Шрифта Dota на сайте нет, запасной крупнее: надписи на полосках и золото уменьшены на десятую */
+/* Ширина блока зависит от кнопок: 219 слева + таланты, врождённая, способности, аганим + 302 справа */
+.center { position: absolute; left: 50%; bottom: 0; width: calc(940px + 4 * (var(--ab-size) - 64px)); height: 436px; transform: translateX(-50%) scale(var(--low-scale)); transform-origin: bottom center; font-variant-numeric: tabular-nums; }
+.center > * { position: absolute; bottom: 0; }
+.flare-l { left: 0; width: 52px; height: 138px; }
+.flare-r { right: 1px; width: 92px; height: 138px; }
+.center-bg { left: 210px; right: 254px; height: 145px; }
+.center-bg .tint { position: absolute; inset: 0; background: var(--ab-bgColor); }
+.inset-shadow { width: 10px; height: 145px; background-size: 100% 100%; z-index: 2; pointer-events: none; }
+.inset-shadow.left { left: 210px; }
+.inset-shadow.right { right: 295px; transform: scaleX(-1); }
+.por { left: 52px; width: 159px; height: 145px; overflow: hidden; display: var(--por-show); opacity: var(--por-opacity); transform: var(--por-offset) scale(var(--por-scale)); transform-origin: bottom center; }
+.por-back { position: absolute; inset: 0; }
+.por-hero { position: absolute; left: -16px; bottom: -14px; width: 175px; height: 175px; object-fit: cover; }
+.por-fade { position: absolute; inset: 0; background: linear-gradient(to right, #0000 40%, #0008 60%, #000c 70%, #000e 80%, #000), linear-gradient(#0000 50%, #000); }
+.stats { position: absolute; right: 5px; top: 1px; display: grid; justify-items: end; z-index: 2; }
+.stats span { display: flex; align-items: center; height: 23.5px; gap: 2px; }
+.stats b, .stats em { font-size: calc(var(--stats-labelSize) + 1px); font-weight: 500; font-style: normal; color: var(--stats-label); text-shadow: var(--stats-labelOutline); }
+.stats em.up { color: #3ed038; }
+.stats em.down { color: #ff4433; }
+.stats img { width: 14px; height: 14px; opacity: .6; }
+.attrs { position: absolute; right: 5px; bottom: 0; height: 20px; display: flex; align-items: center; padding: 0 1px; background: #000a; z-index: 3; }
+.attrs span { display: flex; align-items: center; margin-right: 1px; }
+.attrs b { margin-left: 5px; font-size: 18px; line-height: 20px; font-weight: 500; color: #ccc; text-shadow: 0 0 4px #0008; }
+.attrs img { width: 13px; height: 13px; margin-left: 3px; border-radius: 50%; background: #000; }
+/* Уровень (dota_hud_xp.css): чёрный круг, серая дорожка, золотое кольцо опыта и его размытая оранжевая копия —
+   то самое свечение. Цифра RadianceM с мягким оранжевым ореолом и затуханием книзу (opacity-mask). */
+.level { left: 9px; bottom: 1px; width: 48px; height: 48px; display: grid; place-items: center; z-index: 4; }
+.level::before { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: #000; box-shadow: inset 0 0 0 2px #393939; }
+.level b { position: relative; z-index: 2; margin-top: 1px; font-size: var(--por-levelSize); line-height: 1; color: var(--por-level); text-shadow: var(--por-levelOutline), 0 0 3px #ec780e, 0 0 6px #ec780e88;
+  -webkit-mask-image: linear-gradient(#000 45%, #0009); mask-image: linear-gradient(#000 45%, #0009); }
+.xp-ring { position: absolute; inset: 3px; border-radius: 50%; border: 1.5px solid var(--por-xp); z-index: 1; -webkit-mask-image: conic-gradient(#000 64%, #0000 0); mask-image: conic-gradient(#000 64%, #0000 0); }
+.xp-glow { position: absolute; inset: 3px; border-radius: 50%; border: 2px solid #da6f00; filter: blur(4px); opacity: .8; -webkit-mask-image: conic-gradient(#000 64%, #0000 0); mask-image: conic-gradient(#000 64%, #0000 0); }
+.unit-name { left: 52px; width: 159px; bottom: 145px; text-align: center; font-size: var(--unit-nameSize); line-height: 18px; color: var(--unit-name); text-shadow: var(--unit-nameOutline); text-transform: uppercase; letter-spacing: 2px; font-weight: 700; z-index: 3; }
+
+.bars { left: 223px; right: 306px; bottom: 8px; display: var(--bars-show); opacity: var(--bars-opacity); transform: var(--bars-offset) scale(var(--bars-scale)); transform-origin: bottom center; z-index: 3; }
+.bar { position: relative; display: flex; width: 100%; }
+.bar.hp { height: var(--hp-height); margin-bottom: 2px; }
+.bar.mp { height: var(--mp-height); }
+.bar > i { display: block; height: 100%; }
+.bar-l { position: relative; }
+.hp .bar-l { width: var(--hp-pct); background: var(--hp-fill); border-radius: var(--hp-radius); box-shadow: var(--hp-glow); overflow: hidden; }
+.hp .bar-r { flex: 1; background: var(--hp-track); border-radius: 0 var(--hp-radius) var(--hp-radius) 0; }
+.enemy .hp .bar-l { background: var(--hp-enemy); }
+.enemy .hp .bar-r { background: var(--hp-enemyTrack); }
+.mp .bar-l { width: var(--mp-pct); background: var(--mp-fill); border-radius: var(--mp-radius); box-shadow: var(--mp-glow); overflow: hidden; }
+.mp .bar-r { flex: 1; background: var(--mp-track); border-radius: 0 var(--mp-radius) var(--mp-radius) 0; }
+.bar-val { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; font-weight: 700; }
+.hp .bar-val { color: var(--hp-label); font-size: var(--hp-labelSize); text-shadow: var(--hp-labelOutline); }
+.mp .bar-val { color: var(--mp-label); font-size: var(--mp-labelSize); text-shadow: var(--mp-labelOutline); }
+.regen { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); font-size: 14px; font-weight: 700; font-style: normal; }
+.hp .regen { color: var(--hp-regen); text-shadow: var(--hp-regenOutline); }
+.mp .regen { color: var(--mp-regen); text-shadow: var(--mp-regenOutline); }
+
+/* Способности. Замеры по настоящей игре: кнопка на 6 меньше настройки (58), шаг 65, низ кнопки на 80px,
+   метки уровня — чёрточки 8×3 в 7px под кнопкой. */
+.abilities { left: 215px; bottom: 50px; display: flex; visibility: var(--ab-show-vis); align-items: flex-end; opacity: var(--ab-opacity); transform: var(--ab-offset) scale(var(--ab-scale)); transform-origin: bottom center; z-index: 2; }
+.ab-slot { display: flex; flex-direction: column; align-items: center; flex: none; margin-left: 7px; }
+.innate + .ab-slot { margin-left: 8px; }
+.ab-btn { position: relative; width: calc(var(--ab-size) - 6px); height: calc(var(--ab-size) - 6px); }
+.ab-img { position: absolute; inset: 3px; width: calc(100% - 6px); height: calc(100% - 6px); border-radius: var(--ab-radius); }
+.ab-bevel { position: absolute; inset: 0; display: var(--ab-bevel); pointer-events: none; }
+.ab-cd { position: absolute; inset: 3px; background: var(--ab-cdColor); display: none; border-radius: var(--ab-radius); -webkit-mask-image: conic-gradient(#0000 var(--cd-done, 0%), #000 0); mask-image: conic-gradient(#0000 var(--cd-done, 0%), #000 0); }
+.ab-cd.show { display: block; }
+.ab-cdtext { position: absolute; inset: 0; display: grid; place-items: center; padding-top: 2px; font-size: var(--ab-cdSize); font-weight: 600; color: var(--ab-cd); text-shadow: var(--ab-cdOutline), 0 0 6px #000, 0 0 6px #000, 0 0 3px #000; }
+.ab-mana { position: absolute; right: 0; bottom: -3px; font-size: var(--ab-manaSize); color: var(--ab-mana); text-shadow: var(--ab-manaOutline), 0 0 3px #000, 0 0 3px #000; font-weight: 600; }
+.ab-pips { display: flex; justify-content: center; height: 30px; padding-top: 4px; }
+.ab-pips i { width: 8px; height: 4px; margin: 3px 2px; border-radius: 1px; background: linear-gradient(#111, #000); }
+.ab-pips i.on { border-radius: 0; background: linear-gradient(#e7d291, #887845); }
+.hot { position: absolute; left: -1px; top: -1px; min-width: 13px; padding: 0 2px; background: var(--ab-hotkeyBg); color: var(--ab-hotkey); font-size: 11px; line-height: 13px; font-weight: 500; text-align: center; border: 1px solid #000; border-radius: 2px; z-index: 2; }
+.hot.small { font-size: 10px; line-height: 12px; min-width: 12px; padding: 0 2px; left: -1px; top: -2px; }
+.talent { position: relative; flex: none; width: 74px; height: 74px; margin: 0 -2px 19px 0; display: var(--talent-show); opacity: var(--talent-opacity); transform: var(--talent-offset) scale(var(--talent-scale)); }
+.talent-pips-arc { position: absolute; inset: 0; background-size: cover; }
+.talent-layer { position: absolute; left: 6px; top: 6px; width: 62px; height: 62px; }
+.talent-layer.flip { transform: scaleX(-1); }
+.talent-tree { filter: brightness(1.3); }
+.innate { position: relative; flex: none; width: 38px; height: 62px; margin: 0 0 25px; display: var(--innate-show); opacity: var(--innate-opacity); transform: var(--innate-offset) scale(var(--innate-scale)); }
+.innate-frame { position: absolute; inset: 0; opacity: .8; }
+.innate-icon { position: absolute; left: 50%; top: 50%; width: calc(var(--innate-size) - 6px); height: calc(var(--innate-size) - 6px); transform: translate(-50%, -50%); }
+/* Аганим: скипетр занимает верхние 65% блока, осколок — нижние 35%, они не перекрываются */
+.aghs { position: relative; flex: none; width: 62px; height: 62px; margin: 0 -4px 24px -6px; display: var(--aghs-show); opacity: var(--aghs-opacity); transform: var(--aghs-offset) scale(var(--aghs-scale)); }
+.aghs-s, .aghs-h { position: absolute; left: 0; right: 0; filter: brightness(1.3); }
+.aghs-s { top: 0; height: 65%; }
+.aghs-h { bottom: 0; height: 35%; }
+.aghs .on { display: none; }
+.aghs-on .aghs .on, .aghs-peek .aghs .on { display: block; }
+.aghs-on .aghs .off, .aghs-peek .aghs .off { display: none; }
+
+.inv { right: 93px; width: 202px; height: 145px; display: var(--inv-show); opacity: var(--inv-opacity); transform: var(--inv-offset) scale(var(--inv-scale)); transform-origin: bottom right; }
+.inv-items, .inv-over { position: absolute; left: 0; right: 0; top: 0; }
+.inv-items { bottom: 0; }
+.inv-over { height: 105px; border-bottom: 1px solid #000e; }
+.inv-grid { position: absolute; left: 3px; top: 6px; right: 0; display: flex; flex-wrap: wrap; z-index: 1; }
+.slot { position: relative; width: var(--inv-slotW); height: var(--inv-slotH); margin: 2px 3px; background: var(--inv-slotColor); border-radius: var(--inv-radius); }
+.well { position: absolute; inset: 0; border-radius: var(--inv-radius); overflow: hidden; }
+.item { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: var(--inv-radius); }
+.charges { position: absolute; right: 3px; bottom: 0; font-size: var(--inv-chargesSize); color: var(--inv-charges); text-shadow: var(--inv-chargesOutline); }
+.itemcd { position: absolute; inset: 0; display: grid; place-items: center; background: #0008; font-size: var(--inv-cdSize); color: var(--inv-cd); text-shadow: var(--inv-cdOutline); }
+.backpack { position: absolute; left: 6px; top: 105px; display: flex; gap: 6px; z-index: 1; }
+.pack { width: 60px; height: 32px; background: #0006 center / 100% 100% no-repeat; }
+.pack .item { filter: saturate(.25) brightness(.7); }
+/* Справа от инвентаря: счётчик камней, нейтральный предмет и телепорт (hud_reborn.css) */
+.rounds { right: 43px; width: 48px; height: 160px; z-index: 3; display: var(--round-show); opacity: var(--round-opacity); transform: var(--round-offset) scale(var(--round-scale)); transform-origin: bottom center; }
+.round { position: absolute; left: 0; width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--inv-roundBorder); box-shadow: inset 0 2px 14px -2px #000f; }
+.round > .img { border-radius: 50%; }
+.round.neutral { bottom: 58px; }
+.round.tp { bottom: 9px; }
+.round-item { position: absolute; inset: 5px; width: 36px; height: 36px; object-fit: cover; border-radius: 50%; }
+.round-count { position: absolute; right: -2px; bottom: -3px; font-size: 14px; text-shadow: 0 0 3px #000, 0 0 3px #000; }
+.madstone { position: absolute; left: 2px; bottom: 111px; width: 44px; height: 44px; display: grid; align-content: center; justify-items: center; border-radius: 50%; box-shadow: inset 0 0 0 2px #3a3d42, 0 0 0 2px #0009; background: #0a0c0f; }
+.madstone::before { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 2px solid #bbb; -webkit-mask-image: conic-gradient(#000 30%, #0000 0); mask-image: conic-gradient(#000 30%, #0000 0); }
+.madstone b { font-size: 16px; line-height: 15px; font-weight: 600; color: whitesmoke; text-shadow: 0 0 3px #000; }
+.madstone small { font-size: 10px; line-height: 10px; color: rgba(245, 245, 245, .45); letter-spacing: .5px; }
+
+/* Золото, курьер и быстрая покупка: dota_hud_quick_buy.css и dota_hud_courier.css */
+.launch { position: absolute; right: 0; bottom: 0; width: 292px; height: 136px; display: var(--launch-show); opacity: var(--launch-opacity); transform: var(--launch-offset) scale(var(--launch-scale)); transform-origin: bottom right; font-variant-numeric: tabular-nums; }
+.launch-bg { position: absolute; right: 0; bottom: 0; width: 309px; height: 60px; }
+.quick { position: absolute; left: 1px; right: 0; bottom: 60px; height: 76px; visibility: var(--quick-show-vis); opacity: var(--quick-opacity); transform: var(--quick-offset) scale(var(--quick-scale)); transform-origin: bottom right; box-shadow: inset 0 -1px 4px -1px rgba(0, 0, 0, .5); }
+.quick-tint { position: absolute; inset: 0; background: var(--quick-color); }
+.quick > .img { opacity: calc(var(--o) * .5); }
+.quick-row { position: absolute; left: 4px; top: 8px; display: flex; }
+.quick-row.second { top: 40px; }
+.quick-slot { width: 38px; height: 28px; margin: 0 3px; box-shadow: 0 0 0 1px #c9a227, 0 0 4px #000; }
+.quick-slot img, .quick-sticky img { display: block; width: 38px; height: 28px; object-fit: cover; }
+.quick-actions { position: absolute; right: 57px; top: 0; bottom: 0; display: flex; align-items: center; gap: 3px; }
+.quick-protect { width: 26px; height: 26px; filter: brightness(1.25); }
+.quick-clear { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: rgba(0, 0, 0, .4); border: 1px solid rgba(255, 255, 255, .2); }
+.quick-clear i { width: 13px; height: 13px; background: #e6e9ec; -webkit-mask: center / contain no-repeat; mask: center / contain no-repeat; }
+.quick-sticky { position: absolute; right: 0; top: 0; bottom: 0; width: 53px; display: grid; place-items: center; background: #0000006f; }
+.quick-sticky img { box-shadow: 0 0 0 1px #c9a24a; }
+.shop-btn { position: absolute; left: 25px; top: 50%; width: var(--launch-buttonW); height: var(--launch-buttonH); transform: translateY(-50%); box-shadow: 0 0 2px 2px #0005; }
+.gold { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); color: var(--launch-gold); font-size: var(--launch-goldSize); letter-spacing: 1px; font-weight: 700; text-shadow: var(--launch-goldOutline); }
+.gold-icon { position: absolute; right: 8px; top: 50%; width: 26px; height: 26px; margin-top: -14px; }
+.courier { position: absolute; left: 135px; top: 0; height: 60px; display: flex; align-items: center; }
+.courier-btn { position: relative; flex: none; width: 28px; height: 28px; margin: 0 3px; display: grid; place-items: center; border-radius: 50%; border: 1.5px solid #aebfdd; background: radial-gradient(#6882b172, #6882b125 75%, #6882b100); box-shadow: 0 1px 8px rgba(0, 0, 0, .5); }
+.courier-btn i { width: 19px; height: 19px; background: linear-gradient(#c6daff 20%, #6882b1 80%); -webkit-mask: center / contain no-repeat; mask: center / contain no-repeat; }
+.courier-btn.big { width: 40px; height: 40px; margin: 0 4px; border-width: 2px; }
+.courier-btn.big i { width: 26px; height: 26px; }
+.courier-btn.idle { border-color: #6c727c; background: #14171c88; }
+.courier-btn.idle i { background: #7d848e; }
+.courier-key { position: absolute; left: -7px; top: -7px; min-width: 14px; padding: 0 2px; border-radius: 2px; border: 1px solid #000; background: #212726; color: #bba995; font-size: 9px; line-height: 11px; font-weight: 400; text-align: center; }
+
+/* Открытый магазин */
+.shop { position: absolute; right: 0; bottom: 206px; top: 76px; width: 1010px; display: none; opacity: var(--shop-opacity); transform: var(--shop-offset) scale(var(--shop-scale)); transform-origin: bottom right; z-index: 8; }
+.shop-open .shop { display: var(--shop-show); }
+.guide { position: absolute; left: 0; top: 0; bottom: 0; width: 210px; background: #0b0d10; padding: 12px; }
+.guide > :not(.img) { position: relative; }
+.guide-title { display: block; font-size: 14px; color: var(--shop-guideTitle); margin-bottom: 10px; }
+.guide-row { margin-bottom: 14px; }
+.guide-row small { display: block; color: #9aa4ad; font-size: 12px; margin-bottom: 4px; }
+.guide-row div { display: flex; gap: 3px; }
+.guide-row img { width: 42px; height: 31px; object-fit: cover; }
+.shop-main { position: absolute; right: 0; top: 0; bottom: 0; width: 800px; display: flex; flex-direction: column; }
+.shop-area { position: relative; flex: 1; min-height: 0; }
+.shop-fill { position: absolute; inset: 0; background: var(--shop-color); }
+.shop-search { position: relative; display: flex; align-items: center; gap: 4px; padding: 8px 10px 6px; background: var(--shop-searchRow); }
+.shop-box { flex: 1; height: 32px; display: flex; align-items: center; padding: 0 10px; background: var(--shop-searchBox); border: 1px solid var(--shop-searchBorder); border-radius: 3px; font-size: 18px; color: var(--shop-placeholder); }
+.shop-tool { width: 28px; height: 28px; background: #171717; border-radius: 2px; }
+.shop-cols { position: relative; display: flex; gap: 10px; padding: 8px 6px; }
+.shop-col { flex: 1; min-width: 0; }
+.shop-col:first-child { flex: 0 0 auto; }
+.shop-col-title { display: block; font-size: var(--shop-columnSize); color: var(--shop-column); text-shadow: var(--shop-columnOutline); letter-spacing: 1px; padding-left: 9px; margin-bottom: 6px; }
+.shop-groups { display: flex; gap: 4px; }
+.shop-group { width: calc(var(--shop-itemW) + 12px); display: flex; flex-direction: column; align-items: center; }
+.shop-group-title { width: 100%; height: 34px; overflow: hidden; text-align: center; font-size: var(--shop-groupSize); line-height: 1.1; font-weight: 400; color: var(--shop-group); text-shadow: var(--shop-groupOutline); }
+.shop-item { width: var(--shop-itemW); height: calc(var(--shop-itemW) * .727); margin: 1px 2px 2px; }
+.shop-item img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: var(--shop-itemRadius); }
+.shop-pinned, .shop-combines { position: relative; display: flex; align-items: center; gap: 6px; padding: 0 10px; flex: none; }
+.shop-pinned { height: 84px; background: var(--shop-pinned); }
+.shop-combines { height: 98px; background: var(--shop-combines); }
+.shop-pinned img, .shop-combines img { position: relative; width: 56px; height: 41px; object-fit: cover; }
+
+/* Ветка талантов: dota_hud_stat_branch.css. Центр 420×310, фон 420×270 со сдвигом 5%, строки 190×47 через 53px
+   начиная с 45px, уровни 54×54 через 55px с 37px, снизу кнопка атрибутов 209×48 с семью метками 8×4. */
+.tree { position: absolute; left: calc(50% - 407px); bottom: 110px; width: 420px; height: 310px; display: none; opacity: var(--tree-opacity); transform: var(--tree-offset) scale(var(--tree-scale)); transform-origin: bottom center; z-index: 9; }
+.tree-open .tree { display: var(--tree-show); }
+.tree-center { position: absolute; inset: 0; }
+.tree-bg { position: absolute; left: 0; top: 2px; width: 420px; height: 270px; }
+.tree-bg .img { background-size: 100% 100%; }
+.tree .tip, .tree-tip .tree .pinned, .tree-tip-peek .tree .pinned { display: none; }
+.tree-tip .tree .tip, .tree-tip-peek .tree .tip { display: block; }
+.tree-title { position: absolute; top: 20px; left: 0; right: 0; height: 24px; text-align: center; color: var(--tree-title); font-size: 18px; line-height: 24px; letter-spacing: 2px; text-transform: uppercase; font-weight: 400; text-shadow: var(--tree-titleOutline), 0 0 4px #000, 0 0 4px #000; }
+.tree-row { position: absolute; left: 0; top: calc(40px + var(--row) * 53px); width: 420px; height: 53px; }
+.tree-glow { position: absolute; left: 9.5px; top: 3px; width: 401px; height: 47px; animation: talent-select 2.02s linear infinite; }
+.tree-glow .img { background-size: 100% 100%; }
+.tree-glow.left, .tree-glow.right, .glow-left .tree-glow.both, .glow-right .tree-glow.both { display: none; }
+.glow-left .tree-glow.left, .glow-right .tree-glow.right { display: block; }
+/* При наведении ветка — подсказка: доступный выбор не мигает и уровни не белеют (:not(.ShowStatBranchAsTooltip)). */
+.tree-tip .tree-glow, .tree-tip-peek .tree-glow { display: none !important; }
+@keyframes talent-select { 50% { opacity: .5; } }
+.tree-talent { position: absolute; top: 5px; width: 190px; height: 47px; display: flex; align-items: center; justify-content: center; padding: 1px 3px 0; text-align: center; font-weight: 400; color: var(--tree-label); font-size: var(--tree-labelSize); line-height: 15px; text-shadow: var(--tree-labelOutline), 1px 1px 2px #0007, 1px 1px 2px #0007; }
+.tree-talent.left { left: 6.5px; }
+.tree-talent.right { left: 223.5px; }
+.tree-talent.is-locked { color: var(--tree-disabled); text-shadow: 1px 1px 2px #0006, 1px 1px 2px #0006; }
+/* Выбранный талант в игре светлый (#E7D291) с оранжевым ореолом; цвет из настройки — если его поменяли. */
+.tree-talent.is-chosen { color: var(--tree-chosen-shown, #E7D291); text-shadow: 0 0 2px #ec780e66, 0 0 4px #ec780e44, 1px 1px 2px #0008; }
+.tree-level { position: absolute; left: 183px; top: calc(37px + var(--row) * 55px); width: 54px; height: 54px; display: grid; place-items: center; }
+.tree-level .img { background-size: 80% 80%; }
+.tree-level b { position: relative; margin: 1px 1px 0 0; color: var(--tree-level); font-size: var(--tree-levelSize); letter-spacing: 2px; text-shadow: var(--tree-levelOutline), 0 0 3px #ec780e, 0 0 6px #ec780e55; }
+.tree-level.is-active b { color: #fff; }
+.tree-tip .tree-level.is-active b, .tree-tip-peek .tree-level.is-active b { color: var(--tree-level); }
+.tree-stat { position: absolute; left: 105.5px; bottom: 0; width: 209px; height: 48px; display: grid; place-items: center; border: 1px solid #1b2325; background: #222; color: #e1e1e1; font-size: 15px; line-height: 15px; text-shadow: 1px 1px 2px #0008; }
+.tree-stat > span:first-of-type { position: relative; margin-bottom: 8px; }
+.tree-stat-pips { position: absolute; left: 0; right: 0; bottom: 4px; display: flex; justify-content: center; }
+.tree-stat-pips i { width: 8px; height: 4px; margin: 3px 2px; border-radius: 1px; background: linear-gradient(#111, #000); }
+.tree-stat-pips i.on { border-radius: 0; background: linear-gradient(#e7d291, #887845); }
+
+/* Таблица по Tab: dota_hud_scoreboard.css. Колонки строкой слева направо: слот 48, имя 8+288, таланты 65 (−10/−10),
+   уровень 2+48, золото 13+90, У 13+35, С 35, П 35, ульта 40, жалобы 120 — всего 820. Шапка 32, строка 68 через 70. */
+.board { position: absolute; left: 0; top: 54px; width: 820px; height: 810px; display: none; opacity: var(--board-opacity); transform: var(--board-offset) scale(var(--board-scale)); transform-origin: top left; z-index: 10; }
+.board-open .board { display: var(--board-show); }
+.board-back { position: absolute; inset: 0; box-shadow: 0 0 8px #000000f5; }
+.board-back > .img { background-size: cover; }
+.board-tint { position: absolute; inset: 0; background: var(--board-color); }
+.board-body { position: relative; }
+.sb-head { position: relative; height: 32px; }
+.sb-head > * { position: absolute; bottom: 0; }
+.sb-score { left: 0; width: 48px; text-align: center; line-height: 1; font-weight: 700; color: var(--board-score); font-size: var(--board-scoreSize); }
+.sb-team { left: 56px; width: 288px; padding-bottom: 3px; font-family: 'Reaver', 'Radiance', serif; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; line-height: 1; color: var(--board-team); font-size: var(--board-teamSize); }
+.radiant .sb-score { text-shadow: var(--board-scoreOutline), 0 0 6px #9be40c8f; }
+.radiant .sb-team { text-shadow: var(--board-teamOutline), 0 0 6px #9be40c8f; }
+.dire .sb-score { text-shadow: var(--board-scoreOutline), 0 0 6px #e74d088f; }
+.dire .sb-team { text-shadow: var(--board-teamOutline), 0 0 6px #e74d088f; }
+.sb-sub { margin-bottom: 2px; text-align: center; text-transform: uppercase; font-weight: 700; line-height: 1.1; color: var(--board-header); font-size: var(--board-headerSize); }
+.sb-sub.lvl { left: 391px; width: 48px; }
+.sb-sub.gold { left: 452px; width: 90px; }
+.sb-sub.kda { width: 35px; }
+.sb-sub.kda.first { left: 555px; }
+.sb-sub.kda.first + .kda { left: 590px; }
+.sb-sub.kda.first + .kda + .kda { left: 625px; }
+.sb-sub.ult { left: 660px; width: 40px; }
+.sb-report { position: absolute; left: 700px; top: 0; bottom: 0; width: 120px; background: #0006; }
+.sb-report.head { display: flex; align-items: center; justify-content: space-between; padding: 0 6px 0 5px; }
+.sb-report-text { display: grid; line-height: 1; padding-top: 1px; }
+.sb-report-text b { font-size: 16px; font-weight: 400; letter-spacing: 1px; text-transform: uppercase; color: #999; }
+.sb-report-text small { margin-top: 0; font-size: 10px; font-style: italic; letter-spacing: 1px; text-transform: uppercase; color: #666; }
+.sb-report.head img { width: 24px; height: 24px; }
+.sb-team-rows { height: 350px; }
+.sb-row { position: relative; height: 68px; margin: 1px 0; background: var(--board-row); box-shadow: inset 0 1px #ffffff05, inset 0 -1px #ffffff03; }
+.sb-row.is-local { background: var(--board-localRow); box-shadow: inset 0 1px #5c616a, inset 0 -1px #232323; }
+.sb-row > * { position: absolute; }
+.sb-color { left: 0; top: 0; width: 4px; height: 100%; background-size: 92% 100%; background-repeat: no-repeat; }
+.sb-avatar { left: 10px; top: 15px; width: 38px; height: 38px; background: linear-gradient(#88888822, #44444433); }
+.sb-hero { left: 56px; top: 7px; width: var(--board-imageW); height: var(--board-imageH); object-fit: cover; border: 1px solid #000; border-radius: var(--board-imageRadius); }
+.sb-names { left: 152px; top: 50%; width: 146px; transform: translateY(-50%); display: grid; }
+.sb-player { height: 24px; margin: -2px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 400; color: var(--board-player); font-size: var(--board-playerSize); line-height: 24px; }
+.is-local .sb-player { color: #fff; font-weight: 700; }
+.sb-heroname { margin-top: 0; font-weight: 300; letter-spacing: 1px; text-transform: uppercase; color: var(--board-hero); font-size: var(--board-heroSize); line-height: 1.2; text-shadow: 0 1px 6px #000; }
+.is-local .sb-heroname { color: #dae2e5; }
+.sb-aghs { left: 306px; top: 13px; width: 30px; height: 42px; }
+.sb-aghs-s, .sb-aghs-h { position: absolute; left: 0; right: 0; filter: brightness(1.3); }
+.sb-aghs-s { top: 0; height: 65%; }
+.sb-aghs-h { bottom: 0; height: 35%; }
+.sb-talent { left: 339px; top: 6px; width: 74px; height: 74px; transform: scale(.75); transform-origin: 0 0; }
+.sb-talent .talent-tree { filter: none; }
+.sb-talent:not(.is-local) .talent-tree { filter: brightness(.9); }
+.sb-level { left: 399px; top: 18px; width: 32px; height: 32px; display: grid; place-items: center; }
+.sb-level i { position: absolute; inset: 0; border-radius: 50%; background: #000; box-shadow: inset 0 0 0 2px #393939;
+  -webkit-mask-image: linear-gradient(#000 40%, #0008); mask-image: linear-gradient(#000 40%, #0008); }
+.sb-level i::after { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid #e7d291; -webkit-mask-image: conic-gradient(#000 70%, #0000 0); mask-image: conic-gradient(#000 70%, #0000 0); }
+.sb-level b { position: relative; font-size: 18px; font-weight: 400; color: #e7d291; line-height: 1; }
+.sb-gold-cell { left: 452px; top: 0; width: 90px; height: 100%; display: grid; place-items: center; }
+.sb-buyback { position: absolute; left: 15px; top: 22px; width: 60px; height: 24px; background-size: 100%; background-repeat: no-repeat; }
+.sb-gold { position: relative; width: 60px; padding-top: 2px; text-align: center; font-weight: 700; color: var(--board-gold); font-size: var(--board-goldSize); }
+.sb-kda { top: 0; width: 35px; height: 100%; display: grid; place-items: center; font-weight: 300; color: var(--board-kda); font-size: var(--board-kdaSize); text-shadow: var(--board-kdaOutline); }
+.sb-kda.kills { left: 555px; font-weight: 700; background: linear-gradient(to left, #fff0, #00000033 10%, #00000033 90%, #fff0); }
+.sb-kda.kills + .sb-kda { left: 590px; }
+.sb-kda.kills + .sb-kda + .sb-kda { left: 625px; }
+.is-local .sb-kda { color: #fff; }
+.sb-ult { left: 670px; top: 24px; width: 20px; height: 20px; }
+.sb-ult i { position: absolute; inset: 0; }
+.sb-ult .img { background-size: contain; }
+.sb-buttons { position: absolute; right: 5px; top: 769px; height: 30px; display: flex; align-items: center; }
+.sb-buttons img { width: 32px; height: 32px; margin: 0 4px; opacity: .7; }
+.sb-buttons img.small { width: 26px; height: 26px; margin-top: 4px; }
