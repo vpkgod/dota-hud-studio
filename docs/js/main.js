@@ -155,6 +155,7 @@ async function start() {
       $(`scene-${name}`).setAttribute('aria-pressed', String(name === scene));
     });
     $('treeModes').hidden = scene !== 'tree';
+    $('shopTabs').hidden = scene !== 'shop';
   }
 
   // У ветки талантов в игре два вида: подсказка при наведении на кнопку и закреплённая кликом.
@@ -163,6 +164,14 @@ async function start() {
     $('treeTip').setAttribute('aria-pressed', String(tip));
     $('treePin').setAttribute('aria-pressed', String(!tip));
   }
+  // Вкладки магазина: «Основные», «Улучшения», «Нейтральные».
+  const SHOP_TABS = ['basics', 'upgrades', 'neutrals'];
+  SHOP_TABS.forEach((tab) => $(`shopTab-${tab}`).addEventListener('click', () => {
+    SHOP_TABS.forEach((t) => {
+      stage.classList.toggle(`shop-tab-${t}`, t === tab && t !== 'basics');
+      $(`shopTab-${t}`).setAttribute('aria-pressed', String(t === tab));
+    });
+  }));
   $('treeTip').addEventListener('click', () => setTreeMode(true));
   $('treePin').addEventListener('click', () => setTreeMode(false));
 
@@ -199,6 +208,8 @@ async function start() {
     stage.classList.toggle('aghs-peek', controlId === 'aghs.scepterOn' || controlId === 'aghs.shardOn');
     // Фон подсказки виден только при наведении на кнопку талантов; подсветка одной стороны — когда доступна только она.
     stage.classList.toggle('tree-tip-peek', controlId === 'tree.bgTip');
+    stage.classList.toggle('scan-off', controlId === 'minimap.scanOff');
+    stage.classList.toggle('glyph-off', controlId === 'minimap.glyphOff');
     stage.classList.toggle('glow-left', controlId === 'tree.selectLeft');
     stage.classList.toggle('glow-right', controlId === 'tree.selectRight');
     if (!controlId) return;

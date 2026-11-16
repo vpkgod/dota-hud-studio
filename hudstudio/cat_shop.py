@@ -21,7 +21,10 @@ def _whole_shop_targets():
 
 
 def opened():
+    # У вкладок «Основные» и «Улучшения» свои правила сильнее общего (42 и 38 при обычных 40): пишем и в них.
     item = [{**emit(SHOP, ".ShopItemsRows DOTAShopItem"), "prop": "width"},
+            {**emit(SHOP, "#GridBasicItems DOTAShopItem"), "prop": "width", "delta": 2},
+            {**emit(SHOP, "#GridUpgradeItems.ShopItemsRows #ShopItemsContainer DOTAShopItem"), "prop": "width", "delta": -2},
             {**emit(SHOP, ".ShopItemRowContainer"), "prop": "width", "delta": 12}]
     search_box = emit(SHOP, "#SearchBox", "#SearchTextEntry")
     placeholder = emit(SHOP, "DOTAHUDShopTextEntry #PlaceholderText")
@@ -40,7 +43,9 @@ def opened():
              num("shop.itemW", "Размер иконок", 40, 28, 64, item),
              num("shop.itemRadius", "Скругление иконок", 0, 0, 16,
                  [{**emit(SHOPITEM, "DOTAShopItem #ItemImage"), "prop": "border-radius"}])),
-        *sub("Заголовки колонок", text("shop.column", emit(SHOP, ".ItemContainerLabel"), "#ffffff", 20, hi=36)),
+        *sub("Вкладки", text("shop.tab", emit(SHOP, "#GridMainTabs Label"), "#ffffff", 13, hi=28)),
+        # .ItemContainerLabel есть только у широкого магазина без вкладок (обе колонки рядом).
+        *sub("Заголовки широкого магазина", text("shop.column", emit(SHOP, ".ItemContainerLabel"), "#ffffff", 20, hi=36)),
         *sub("Названия групп",
              color("shop.group", "Цвет", "#ffffff", emit(SHOP, "#ShopItemsHeader")),
              num("shop.groupSize", "Размер", 14, 8, 28, [{**emit(SHOP, "#ShopItemsHeader"), "prop": "font-size"}]),

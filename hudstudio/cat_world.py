@@ -1,6 +1,6 @@
 """Настройки вне нижней панели: мини-карта, верхняя панель, баффы и весь худ целиком."""
 
-from .cat_helpers import (BUFF, REBORN, REBORN_IMG, TOPBAR, block, color, emit, image, num, sub, text)
+from .cat_helpers import (BUFF, GLYPH, RADAR, REBORN, REBORN_IMG, TOPBAR, block, color, emit, image, num, sub, text)
 
 # В Dota есть настройка «крупная мини-карта»: её правила сильнее простого #minimap,
 # поэтому размер пишем во все три варианта.
@@ -27,7 +27,19 @@ def minimap():
         *sub("Положение карты", block("minimap", "#minimap_block", scale=False)),
         *sub("Глиф и скан",
              image("minimap.glyph", "Картинка панели", [emit(REBORN, "#GlyphScanContainer")],
-                   REBORN_IMG + "glyph_scan_bg_psd.png", "cover")),
+                   REBORN_IMG + "glyph_scan_bg_psd.png", "cover"),
+             # Кнопки сами по себе — отдельные картинки: у обычного героя #GlyphButton и #RadarIcon,
+             # в некоторых режимах — варианты Radiant/Dire. На перезарядке игра ставит другую картинку (.CoolingDown).
+             image("minimap.scan", "Скан", [emit(RADAR, "#RadarIcon", "#RadiantRadarIcon", "#DireRadarIcon")],
+                   REBORN_IMG + "icon_scan_on_psd.png"),
+             image("minimap.scanOff", "Скан на перезарядке",
+                   [emit(RADAR, ".CoolingDown #RadarIcon", ".CoolingDown #RadiantRadarIcon", ".CoolingDown #DireRadarIcon")],
+                   REBORN_IMG + "icon_scan_off_psd.png"),
+             image("minimap.glyphBtn", "Глиф", [emit(GLYPH, "#GlyphButton", "#RadiantGlyphButton", "#DireGlyphButton")],
+                   REBORN_IMG + "icon_glyph_on_psd.png"),
+             image("minimap.glyphOff", "Глиф на перезарядке",
+                   [emit(GLYPH, ".CoolingDown #GlyphButton", ".CoolingDown #RadiantGlyphButton", ".CoolingDown #DireGlyphButton")],
+                   REBORN_IMG + "icon_glyph_off_psd.png")),
         *sub("Положение глифа", block("glyph", "#GlyphScanContainer", scale=False)),
     ]
 

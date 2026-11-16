@@ -31,7 +31,13 @@ PREVIEW_EXTRAS = [
     "panorama/images/hud/tormentor_timer_icon", "panorama/images/hud/icon_roshan_psd", "panorama/images/hud_radar_png",
     "panorama/images/hud/pip_",
     "panorama/images/control_icons/brackets_png",
-    "materials/vgui/hud/minimap_creepcamp_psd", "materials/vgui/hud/minimap_herocircle_psd",
+    # Магазин: все иконки предметов и раскладка лавки по разделам.
+    "panorama/images/items/", "scripts/shops.txt",
+    "panorama/images/hud/shopborder_canpurchase_psd", "panorama/images/control_icons/icon_search_shadow_psd",
+    "panorama/images/icon_star_shadow_hi_psd", "panorama/images/hud/shop_hud_layout_columns_png",
+    "panorama/images/hud/team_items_toggle_png", "panorama/images/control_icons/edit_pencil_psd",
+    "panorama/images/control_icons/24px/help", "panorama/images/hud/neutral_currency_icon_png",
+    "materials/vgui/hud/minimap_herocircle_psd",
 ]
 _REBORN = "panorama/images/hud/reborn/"
 _HUD = "panorama/images/hud/"
@@ -64,11 +70,64 @@ PREVIEW_UI = {
     "coaches": _REBORN + "icon_coach_png.png", "combatLog": _REBORN + "icon_combat_log_psd.png",
     "sharedContent": _REBORN + "shared_content_rest_psd.png", "sharedUnits": _REBORN + "sharedunit_rest_png.png",
     "showItems": "panorama/images/control_icons/brackets_png.png",
-    # Мини-карта: значок лагеря и кольцо-стрелка под героем (их имена без хвоста-хэша, см. _plain_names).
-    "mmCamp": "materials/vgui/hud/minimap_creepcamp_psd.png", "mmHeroRing": "materials/vgui/hud/minimap_herocircle_psd.png",
+    # Мини-карта: кольцо-стрелка под героем (их имена без хвоста-хэша, см. _plain_names).
+    "mmHeroRing": "materials/vgui/hud/minimap_herocircle_psd.png",
+    # Окно магазина: рамка «можно купить», значки строки поиска, гайд, тайник и вкладка нейтральных.
+    "shopBorder": _HUD + "shopborder_canpurchase_psd.png", "shopSearch": "panorama/images/control_icons/icon_search_shadow_psd.png",
+    "shopSuggest": _REBORN + "icon_suggest_item_psd.png", "shopStar": "panorama/images/icon_star_shadow_hi_psd.png",
+    "shopColumns": _HUD + "shop_hud_layout_columns_png.png", "shopTeamItems": _HUD + "team_items_toggle_png.png",
+    "guideToggle": _REBORN + "close_guide_btn_psd.png", "itemBuildBg": _REBORN + "bg_item_build_psd.png",
+    "pencil": "panorama/images/control_icons/edit_pencil_psd.png", "help": _ICONS + "help.svg",
+    "madstone": _HUD + "neutral_currency_icon_png.png",
 }
 # Меняется, когда программе нужны новые файлы игры: кэш тогда распаковывается заново.
-CACHE_VERSION = "6"
+CACHE_VERSION = "8"
+# Разделы магазина из scripts/shops.txt — так, как они стоят на вкладках «Основные» и «Улучшения».
+SHOP_SECTIONS = {
+    "basics": [["consumables", "Расходники"], ["attributes", "Атрибуты"], ["weapons_armor", "Снаряжение"],
+               ["misc", "Разное"], ["secretshop", "Потайная лавка"]],
+    "upgrades": [["basics", "Аксессуары"], ["support", "Поддержка"], ["magics", "Магия"], ["defense", "Броня"],
+                 ["weapons", "Оружие"], ["artifacts", "Вооружение"]],
+}
+# Стандартная сборка Juggernaut для гайда слева: [предмет, число на иконке].
+GUIDE = [
+    ["Начальные предметы", [["tango", 2], ["branches", 2], ["quelling_blade", 0], ["slippers", 0], ["circlet", 0], ["faerie_fire", 0], ["ward_observer", 0]]],
+    ["Ранняя игра", [["wraith_band", 0], ["phase_boots", 0], ["magic_wand", 0]]],
+    ["Середина игры", [["bfury", 0], ["manta", 0], ["sange_and_yasha", 0], ["diffusal_blade", 0]]],
+    ["Поздняя игра", [["skadi", 0], ["butterfly", 0], ["abyssal_blade", 0], ["satanic", 0], ["aghanims_shard", 0]]],
+    ["Популярные предметы", [["black_king_bar", 0], ["blink", 0], ["monkey_king_bar", 0], ["mjollnir", 0], ["basher", 0],
+                             ["swift_blink", 0], ["disperser", 0], ["revenants_brooch", 0]]],
+]
+PINNED = [["tango", 2], ["clarity", 3], ["enchanted_mango", 3], ["ward_observer", 0], ["flask", 1], ["dust", 2]]
+SHOP_FILE = "scripts/shops.txt"
+
+
+def item_image(name: str) -> str:
+    return f"panorama/images/items/{name}_png.png"
+
+
+def shop_layout(root: Path) -> dict:
+    """Разделы магазина с предметами, у которых в кэше есть картинка. Без shops.txt — пусто."""
+    path = root / SHOP_FILE
+    if not path.is_file():
+        return {}
+    text = path.read_text("utf8", errors="replace")
+    blocks = {name: re.findall(r'"item"\s+"item_(\w+)"', body)
+              for name, body in re.findall(r'^\t"(\w+)"[^\n]*\n\t\{(.*?)^\t\}', text, flags=re.S | re.M)}
+    have = lambda name: (root / item_image(name)).is_file()
+    tabs = {tab: [{"title": title, "items": [i for i in blocks.get(key, []) if have(i)]} for key, title in sections]
+            for tab, sections in SHOP_SECTIONS.items()}
+    guide = [{"title": title, "items": [[i, n] for i, n in items if have(i)]} for title, items in GUIDE]
+    return {**tabs, "guide": guide, "pinned": [[i, n] for i, n in PINNED if have(i)]}
+
+
+def shop_images(layout: dict) -> list:
+    names = {i for tab in ("basics", "upgrades") for section in layout.get(tab, []) for i in section["items"]}
+    names |= {i for section in layout.get("guide", []) for i, _ in section["items"]}
+    names |= {i for i, _ in layout.get("pinned", [])}
+    return sorted(item_image(n) for n in names)
+
+
 HASHED = re.compile(r"^(.+_psd)_[0-9a-f]{5,8}\.png$")
 OVERVIEW = re.compile(r"materials/overviews/dota_(\d+)_psd\S*\.vtex_c")
 
@@ -134,7 +193,7 @@ class Assets:
 
     @staticmethod
     def _plain_names(root: Path) -> None:
-        """Картинки из materials/ лежат с хэшем в имени (minimap_creepcamp_psd_72d26740.png): копия без него."""
+        """Картинки из materials/ лежат с хэшем в имени (minimap_herocircle_psd_9c6f9996.png): копия без него."""
         folder = root / "materials/vgui/hud"
         for path in folder.glob("*.png") if folder.is_dir() else []:
             plain = HASHED.sub(r"\1.png", path.name)

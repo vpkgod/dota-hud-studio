@@ -17,6 +17,8 @@ ITEMBUILD = "hud/dota_hud_item_build.css"
 SHOPITEM = "dota_ui_shop_item.css"
 STATBRANCH = "hud/dota_hud_stat_branch.css"
 SCOREBOARD = "hud/dota_hud_scoreboard.css"
+GLYPH = "hud/dota_hud_glyph.css"
+RADAR = "dota_hud_radar_button.css"
 
 REBORN_IMG = "panorama/images/hud/reborn/"
 FACETS_IMG = "panorama/images/hud/facets/"

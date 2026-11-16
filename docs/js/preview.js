@@ -144,20 +144,15 @@ function topBar(assets) {
     </div>`;
 }
 
-// Мини-карта как в игре: пиксельная карта, туман войны вне обзора Света, постройки квадратами,
-// лагеря треугольниками и пиксельные портреты героев на кольце-стрелке. Места сняты со скриншота игры, в % карты.
+// Мини-карта как в игре: пиксельная карта, туман войны вне обзора Света, постройки квадратами
+// и пиксельные портреты героев на кольце-стрелке (лагерей игра на мини-карте не рисует). Места сняты со скриншота игры, в % карты.
 const MAP_BUILDINGS = [
   [47.4, 15], [68.6, 16.4], [73, 20.1], [78.1, 21.5], [79.6, 20.1], [76.6, 23.7], [73, 26.6], [84.7, 30.3], [62.5, 36.9], [84.7, 46.8], [83.9, 62],
 ].map(([x, y]) => [x, y, 'd']).concat([
   [10.9, 54.1], [10.2, 68.2], [30.7, 65.8], [16.1, 74.1], [19.7, 72.6], [16.8, 78.5], [13.9, 77], [46, 85],
 ].map(([x, y]) => [x, y, 'r']));
-const MAP_CAMPS = [
-  [24.1, 3], [31.8, 7.4], [49.6, 4.7], [59.6, 4.5], [25.7, 21.5], [20.4, 25.9], [33.3, 26.9], [43.1, 20.5], [53.3, 24.5],
-  [55.5, 25.6], [52.8, 33.9], [55, 34.2], [72.7, 49.3], [67.6, 56.6], [93.4, 33.9], [95.4, 41.2], [92.7, 49.7], [73, 70.4],
-  [70.8, 77.7], [85.8, 79.9], [65.4, 94.3], [73, 94.3], [2.6, 51.5], [3.6, 58.8], [20.4, 55.8],
-];
 // [x, y, номер героя в assets.icons, сторона, куда смотрит стрелка]
-const MAP_HEROES = [[11.7, 29.6, 8, 'enemy', 100], [59.9, 61.7, 3, 'enemy', 150], [45.3, 70.4, 6, 'enemy', 120], [28.5, 90.1, 5, 'ally', 200]];
+const MAP_HEROES = [[11.7, 29.6, 8, 'enemy', 100], [45.3, 70.4, 6, 'enemy', 120]];
 
 function mapUnit([x, y, hero, side, turn], icons, ring) {
   return `
@@ -176,18 +171,16 @@ function timerButton(kind, bg, icon) {
 
 function minimap(assets) {
   const { ui } = assets;
-  const camp = game(ui.mmCamp);
   const ring = game(ui.mmHeroRing);
   const buildings = MAP_BUILDINGS.map(([x, y, team]) => `<i class="mm-mark ${team}" style="left:${x}%;top:${y}%"></i>`).join('');
-  const camps = MAP_CAMPS.map(([x, y]) => `<i class="mm-camp" style="left:${x}%;top:${y}%;-webkit-mask-image:url('${camp}');mask-image:url('${camp}')"></i>`).join('');
   return `
     <div class="mm-block" data-b="minimap" data-tab="minimap">
       <div class="mm" data-c="minimap.bg">
         ${img('minimap.bg')}
         <i class="mm-map" data-src="${game(assets.overview)}">
-          <i class="mm-fog"></i>${camps}${buildings}
+          <i class="mm-fog"></i>${buildings}
           ${MAP_HEROES.map((unit) => mapUnit(unit, assets.icons, ring)).join('')}
-          <span class="mm-unit self" style="left:6.6%;top:84.3%;--turn:300deg">
+          <span class="mm-unit self" style="left:14%;top:84%;--turn:300deg">
             <i class="mm-ring" style="-webkit-mask-image:url('${ring}');mask-image:url('${ring}')"></i>
             <img src="${game(assets.icons[0])}" alt="" draggable="false">
           </span>
@@ -199,8 +192,8 @@ function minimap(assets) {
       ${timerButton('tormentor', ui.tormentorBg, ui.tormentor)}
     </div>
     <div class="glyph" data-b="glyph" data-tab="minimap" data-c="minimap.glyph">${img('minimap.glyph')}
-      <span class="mm-round scan"><img src="${game(ui.scan)}" alt="" draggable="false"><b>2</b></span>
-      <span class="mm-round fort"><img src="${game(ui.glyph)}" alt="" draggable="false"></span>
+      <span class="mm-round scan"><i class="on" data-c="minimap.scan">${img('minimap.scan')}</i><i class="off" data-c="minimap.scanOff">${img('minimap.scanOff')}</i><b>2</b></span>
+      <span class="mm-round fort"><i class="on" data-c="minimap.glyphBtn">${img('minimap.glyphBtn')}</i><i class="off" data-c="minimap.glyphOff">${img('minimap.glyphOff')}</i></span>
     </div>`;
 }
 
@@ -365,7 +358,7 @@ export function renderStage(stage, assets) {
     ${buffRow(assets)}
     ${centerPanel(assets)}
     ${launcher(assets)}
-    ${shopPanel(assets.items)}
+    ${shopPanel(assets)}
     ${treePanel()}
     ${boardPanel(assets)}
   </div>`;

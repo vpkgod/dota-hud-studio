@@ -10,7 +10,7 @@ import tempfile
 from pathlib import Path
 
 from . import catalog, resource
-from .assets import Assets, preview_manifest
+from .assets import Assets, preview_manifest, shop_images, shop_layout
 from .config import Config, load_config
 from .tools import run_tool
 
@@ -58,10 +58,10 @@ def _write_styles(raw: Path, site: Path) -> None:
         target.write_text(resource.panorama_text(compiled.read_bytes()), "utf8")
 
 
-def _write_images(cache_root: Path, site: Path) -> None:
+def _write_images(cache_root: Path, site: Path, extra=()) -> None:
     target_root = site / "game"
     shutil.rmtree(target_root, ignore_errors=True)
-    for rel in preview_images():
+    for rel in [*preview_images(), *extra]:
         source = cache_root / rel
         if not source.is_file():
             raise FileNotFoundError(f"В кэше игры нет картинки {rel}")
@@ -70,8 +70,8 @@ def _write_images(cache_root: Path, site: Path) -> None:
         shutil.copyfile(source, target)
 
 
-def _write_catalog(cfg: Config, site: Path) -> None:
-    data = {"areas": catalog.AREAS, "groups": catalog.groups(), "preview": preview_manifest(),
+def _write_catalog(cfg: Config, site: Path, shop=None) -> None:
+    data = {"areas": catalog.AREAS, "groups": catalog.groups(), "preview": {**preview_manifest(), "shop": shop or {}},
             "styles": style_files(), "game": _game_version(cfg)}
     target = site / "data/catalog.json"
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -89,8 +89,9 @@ def export(cfg: Config, run=run_tool) -> None:
         raw = Path(tmp)
         _dump_raw(cfg, [f"{STYLE_DIR}{Path(name).with_suffix('.vcss_c')}" for name in styles], raw, run)
         _write_styles(raw, site)
-    _write_images(assets.root, site)
-    _write_catalog(cfg, site)
+    shop = shop_layout(assets.root)
+    _write_images(assets.root, site, shop_images(shop))
+    _write_catalog(cfg, site, shop)
 
 
 def main() -> None:

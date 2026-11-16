@@ -17,6 +17,10 @@ HINTS = {
     "hp.labelOutline": "Делает цифры заметнее на любом фоне.",
     "ab.bg": "Подойдёт широкая картинка.",
     "innate.icon": "Заменится у всех героев.",
+    "minimap.scanOff": "Так кнопка выглядит, пока скан перезаряжается. В превью видна при наведении на эту настройку.",
+    "minimap.glyphOff": "Так кнопка выглядит, пока глиф перезаряжается. В превью видна при наведении на эту настройку.",
+    "shop.column": "Только у широкого вида магазина, где «Основные» и «Улучшения» стоят рядом. В обычном магазине с вкладками их нет.",
+    "shop.tab": "«Основные», «Улучшения», «Нейтральные» над предметами.",
     "tree.bg": "Ветка, открытая кликом по кнопке талантов («Выберите талант»).",
     "tree.bgTip": "Ветка, которая появляется при наведении мыши на кнопку талантов («Древо талантов»).",
     "board.bg": "Таблица открывается по клавише Tab.",
@@ -44,7 +48,8 @@ GROUP_ORDER = ["global", "bars", "ab", "talents", "inv", "por",
                "top", "minimap", "buffs", "launch", "shop", "tree", "board"]
 
 # Эти настройки работают только в игре: в превью нет такого состояния.
-GAME_ONLY = {"ab.noMana", "shop.searchText", "tree.description", "board.ultCd", "board.ultMana"}
+GAME_ONLY = {"ab.noMana", "shop.searchText", "tree.description", "board.ultCd", "board.ultMana",
+             "shop.column", "shop.columnSize", "shop.columnOutline"}
 
 
 def _with_hint(control):
