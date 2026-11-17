@@ -114,12 +114,13 @@ def _follow(target, values: dict) -> list[str]:
     ratio = values.get(lead.get("scale"), 100) / 100
     home = lead["margin"] if lead["side"] == "left" else width - lead["margin"] - lead["width"]
     own_left = left + (own["margin"] - home) * ratio
-    y = f"translateY( {_number(value['y'] + own['bottom'] * (1 - ratio))}px )"
+    y = f"translateY( {_number(value['y'] + own['bottom'] * (1 - ratio) + own.get('dy', 0))}px )"
+    dx = own.get("dx", 0)  # свой сдвиг панели в игре: наш transform его заменяет, поэтому добавляем
     decls = [] if ratio == 1 else [f"ui-scale: {_number(ratio * 100)}%"]
     if on_left:
-        return [*decls, f"transform: translateX( {_number(own_left - own['margin'])}px ) {y}"]
+        return [*decls, f"transform: translateX( {_number(own_left - own['margin'] + dx)}px ) {y}"]
     return [*decls, "horizontal-align: right", "margin-left: 0px",
-            f"margin-right: {_number(width - own_left - own['width'] * ratio)}px", f"transform: translateX( 0px ) {y}"]
+            f"margin-right: {_number(width - own_left - own['width'] * ratio)}px", f"transform: translateX( {_number(dx)}px ) {y}"]
 
 
 def _declarations(control, target, value, values=None) -> list[str]:

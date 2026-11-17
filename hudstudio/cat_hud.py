@@ -100,7 +100,8 @@ def abilities():
         *sub("Тень по краям фона",
              image("ab.inset", "Тень у краёв", [emit(REBORN, ".AbilityInsetShadowLeft", ".AbilityInsetShadowRight")],
                    REBORN_IMG + "ability_inset_shadow_psd.png")),
-        *sub("Положение", block("ab", "#AbilitiesAndStatBranch", carry=TALENT_HINT)),
+        *sub("Положение", block("ab", "#AbilitiesAndStatBranch",
+                                   carry=(*TALENT_HINT, emit(REBORN, "#HUDSkinAbilityContainerBG", sum=["ab.offset"])))),
     ]
 
 
@@ -186,6 +187,12 @@ PORTRAIT_FOLLOWERS = (
     emit(REBORN, "#unitname", own={"margin": 52, "width": 159, "bottom": 145}),
     emit(REBORN, "#PortraitHeroBadgeOverlay", own={"margin": 29, "width": 182, "bottom": 105}),
     emit(REBORN, "#PortraitHeroBadge", own={"margin": 25, "width": 50, "bottom": 128}),
+    # Портрет при выделении нескольких юнитов, значок предмета и кнопка «График смертей» (Dota Plus, у мёртвого).
+    emit(REBORN, "#multiunit", own={"margin": 52, "width": 159, "bottom": 0}),
+    emit(REBORN, "#econ_item", own={"margin": 85, "width": 97, "bottom": 35}),
+    emit(REBORN, "#KillGraphButton", own={"margin": 52, "width": 159, "bottom": 145}),
+    # Рамка портрета из скина худа: у неё в игре свой сдвиг translateX(-14px) translateY(25px).
+    emit(REBORN, "#HUDSkinPortrait", own={"margin": 0, "width": 234, "bottom": 0, "dx": -14, "dy": 25}),
 )
 
 

@@ -378,7 +378,7 @@
 .tree-level b { position: relative; margin: 1px 1px 0 0; color: var(--tree-level); font-size: var(--tree-levelSize); letter-spacing: 2px; text-shadow: var(--tree-levelOutline), 0 0 3px #ec780e, 0 0 6px #ec780e55; }
 .tree-level.is-active b { color: #fff; }
 .tree-tip .tree-level.is-active b, .tree-tip-peek .tree-level.is-active b { color: var(--tree-level); }
-.tree-stat { position: absolute; left: 105.5px; bottom: 0; width: 209px; height: 48px; display: grid; place-items: center; border: 1px solid #1b2325; background: #222; color: #e1e1e1; font-size: 15px; line-height: 15px; text-shadow: 1px 1px 2px #0008; }
+.tree-stat { position: absolute; left: 105.5px; bottom: 0; width: 209px; height: 48px; display: grid; place-items: center; border: 1px solid #1b2325; background: var(--tree-statColor); color: #e1e1e1; font-size: 15px; line-height: 15px; text-shadow: 1px 1px 2px #0008; }
 .tree-stat > span:first-of-type { position: relative; margin-bottom: 8px; }
 .tree-stat-pips { position: absolute; left: 0; right: 0; bottom: 4px; display: flex; justify-content: center; }
 .tree-stat-pips i { width: 8px; height: 4px; margin: 3px 2px; border-radius: 1px; background: linear-gradient(#111, #000); }

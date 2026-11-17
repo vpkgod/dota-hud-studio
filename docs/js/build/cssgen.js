@@ -77,11 +77,12 @@ function follow(target, values) {
   const ratio = (lead.scale && lead.scale in values ? values[lead.scale] : 100) / 100;
   const home = lead.side === 'left' ? lead.margin : width - lead.margin - lead.width;
   const ownLeft = left + (own.margin - home) * ratio;
-  const y = `translateY( ${number(value.y + own.bottom * (1 - ratio))}px )`;
+  const y = `translateY( ${number(value.y + own.bottom * (1 - ratio) + (own.dy || 0))}px )`;
+  const dx = own.dx || 0; // свой сдвиг панели в игре: наш transform его заменяет, поэтому добавляем
   const decls = ratio === 1 ? [] : [`ui-scale: ${number(ratio * 100)}%`];
-  if (onLeft) return [...decls, `transform: translateX( ${number(ownLeft - own.margin)}px ) ${y}`];
+  if (onLeft) return [...decls, `transform: translateX( ${number(ownLeft - own.margin + dx)}px ) ${y}`];
   return [...decls, 'horizontal-align: right', 'margin-left: 0px',
-    `margin-right: ${number(width - ownLeft - own.width * ratio)}px`, `transform: translateX( 0px ) ${y}`];
+    `margin-right: ${number(width - ownLeft - own.width * ratio)}px`, `transform: translateX( ${number(dx)}px ) ${y}`];
 }
 
 function summed(target, values) {

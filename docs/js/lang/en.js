@@ -430,6 +430,7 @@ export default {
   'Метки атрибутов под деревом': 'Attribute marks under the tree',
   'Цвет взятых меток': 'Color of taken marks',
   'Пустые метки': 'Empty marks',
+  'Цвет под кнопкой атрибутов': 'Color under the attribute button',
   'Ширина': 'Width',
   'Скругление': 'Rounding',
   'Заряды на предметах': 'Item charges',
