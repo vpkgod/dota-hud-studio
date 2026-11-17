@@ -25,7 +25,7 @@ KNOWN_STATIC = {"center_bg", "left_flare", "right_flare", "RecommendedUpgradeOve
 
 
 def _latest(cache: Path) -> Path:
-    roots = sorted(cache.glob("*/panorama"))
+    roots = sorted(p.parent for p in cache.glob("*/panorama/styles"))  # только кэш игры, не снимки проверки
     if not roots:
         raise SystemExit("Нет кэша игры: сначала python3 -m hudstudio.export")
     return roots[-1]

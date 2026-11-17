@@ -24,10 +24,13 @@ export function panoramaFill(fill) {
   return `gradient( linear, 0% 0%, ${end}, from( ${stops[0].c} ), ${middle}to( ${stops[stops.length - 1].c} ) )`;
 }
 
-function imageDecls(value) {
+function imageDecls(value, control) {
   const decls = [`background-image: url("s2r://${imageGamePath(value.id)}.vtex")`];
   if (value.fit !== 'original') {
     decls.push(`background-size: ${FIT_CSS[value.fit]}`, 'background-position: 50% 50%', 'background-repeat: no-repeat');
+  } else if (control && control.game_sized === false) {
+    // «Как в игре», но у панели в игре размер фона не задан (#QuickBuyRows): пишем размер, как в превью.
+    decls.push(`background-size: ${control.preview_fit}`, 'background-position: 50% 50%', 'background-repeat: no-repeat');
   }
   if (value.opacity < 1) decls.push(`background-img-opacity: ${number(value.opacity)}`);
   return decls;
@@ -87,11 +90,13 @@ function follow(target, values) {
 
 function summed(target, values) {
   const moves = target.sum.map((id) => (id in values ? values[id] : { x: 0, y: 0 }));
-  return { x: moves.reduce((a, m) => a + m.x, 0), y: moves.reduce((a, m) => a + m.y, 0) };
+  return { x: moves.reduce((a, m) => a + m.x, 0) + (target.dx || 0), y: moves.reduce((a, m) => a + m.y, 0) };
 }
 
 function declarations(control, target, value, values = {}) {
   if (target.lead) return follow(target, values);
+  // Готовое правило для соседней панели (спрятать тень), а не значение самой настройки.
+  if ((control.type === 'num' || control.type === 'offset') && target.raw) return target.raw;
   switch (control.type) {
     case 'fill': return [`${target.prop}: ${panoramaFill(value)}`];
     case 'color': return [`${target.prop}: ${value}`, ...(target.extra || [])];
@@ -103,7 +108,7 @@ function declarations(control, target, value, values = {}) {
     case 'offset': return offset(target, target.sum ? summed(target, values) : value, values);
     case 'image':
       if (!value) return [];
-      return target.raw ? target.raw : imageDecls(value);
+      return target.raw ? target.raw : imageDecls(value, control);
     default: throw new Error(`Неизвестный тип настройки: ${control.type}`);
   }
 }
@@ -121,7 +126,7 @@ function collect(controls, values) {
       const old = rules.get(key) || [];
       let fresh = declarations(control, target, value, values);
       // Общее правило пишем один раз, сколько бы блоков его ни просили.
-      if (target.sum || target.lead) fresh = fresh.filter((d) => !old.includes(d));
+      if (target.sum || target.lead || (target.raw && (control.type === 'num' || control.type === 'offset'))) fresh = fresh.filter((d) => !old.includes(d));
       rules.set(key, [...old, ...fresh]);
     }
   }

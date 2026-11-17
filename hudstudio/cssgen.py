@@ -29,10 +29,16 @@ def _num_value(control, target, value) -> str:
     return f"{_number(adjusted / control['div'])}{control['unit']}"
 
 
-def _image_decls(value) -> list[str]:
+def _image_decls(value, control=None) -> list[str]:
     decls = [f'background-image: url("s2r://{image_game_path(value["id"])}.vtex")']
-    if value["fit"] != "original":  # перекрашенный оригинал лежит так же, как задумано в игре
+    if value["fit"] != "original":
         decls += [f"background-size: {FIT_CSS[value['fit']]}",
+                  "background-position: 50% 50%",
+                  "background-repeat: no-repeat"]
+    elif control and control.get("game_sized") is False:
+        # «Как в игре», но у панели в игре размер фона не задан (#QuickBuyRows): без этого картинка
+        # встаёт своим размером посередине. Пишем размер, как в превью.
+        decls += [f"background-size: {control['preview_fit']}",
                   "background-position: 50% 50%",
                   "background-repeat: no-repeat"]
     if value["opacity"] < 1:
@@ -61,7 +67,7 @@ def center_width(values: dict) -> int:
 
 def _summed(target, values: dict) -> dict:
     moves = [values.get(cid, {"x": 0, "y": 0}) for cid in target["sum"]]
-    return {"x": sum(m["x"] for m in moves), "y": sum(m["y"] for m in moves)}
+    return {"x": sum(m["x"] for m in moves) + target.get("dx", 0), "y": sum(m["y"] for m in moves)}
 
 
 def _place(anchor, value, values: dict):
@@ -128,6 +134,8 @@ def _declarations(control, target, value, values=None) -> list[str]:
     kind = control["type"]
     if "lead" in target:
         return _follow(target, values)
+    if kind in ("num", "offset") and "raw" in target:  # готовое правило для соседней панели (спрятать тень)
+        return target["raw"]
     if kind == "fill":
         return [f"{target['prop']}: {panorama_fill(value)}"]
     if kind == "color":
@@ -147,7 +155,7 @@ def _declarations(control, target, value, values=None) -> list[str]:
     if kind == "image":
         if not value:
             return []
-        return target["raw"] if "raw" in target else _image_decls(value)
+        return target["raw"] if "raw" in target else _image_decls(value, control)
     raise ValueError(f"Неизвестный тип настройки: {kind}")
 
 
@@ -163,7 +171,7 @@ def _collect(values: dict) -> dict:
             rules = files.setdefault(target["file"], {})
             old = rules.get(key, [])
             new = _declarations(control, target, value, values)
-            if "sum" in target or "lead" in target:  # общее правило пишем один раз, сколько бы блоков его ни просили
+            if "sum" in target or "lead" in target or ("raw" in target and control["type"] in ("num", "offset")):  # общее правило пишем один раз, сколько бы блоков его ни просили
                 new = [d for d in new if d not in old]
             rules[key] = [*old, *new]
     return files

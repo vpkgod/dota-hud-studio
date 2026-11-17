@@ -4,7 +4,7 @@
 """
 
 from .cat_helpers import (ABILITY, AGHS, FACETS_IMG, HEALTH, HUD_IMG, INNATE, INVENTORY, REBORN, REBORN_IMG,
-                          STATBRANCH, STATS, TALENT_HINT, UNITNAME,
+                          HIDE_INSET, STATBRANCH, STATS, TALENT_HINT, UNITNAME,
                           XP, block, color, emit, fill, glow, grad, image, num, outline, sub, text, texture, toggle)
 
 
@@ -30,7 +30,7 @@ def bars():
     return [
         *sub("Полоска здоровья",
              fill("hp.fill", "Цвет полоски", grad("#425d25", (.2, "#5BA539"), (.5, "#4D9030"), "#425d25"), hp_left),
-             image("hp.fillImg", "Картинка на заливке", [hp_left], "", "cover"),
+             image("hp.fillImg", "Картинка на заливке", [hp_left], "", "cover", game_sized=False),
              fill("hp.track", "Цвет пустой части", grad("#17200d", (.2, "#222e13"), (.5, "#1e2911"), "#17200d"), hp_right),
              num("hp.height", "Высота", 26, 8, 60, [{**emit(HEALTH, ".Reborn #HealthContainer"), "prop": "height"}]),
              _bar_radius("hp.radius", hp_left, hp_right),
@@ -41,7 +41,7 @@ def bars():
              outline("hp.regenOutline", "Обводка регенерации", hp_regen, "0 2px 4px #000")),
         *sub("Полоска маны",
              fill("mp.fill", "Цвет полоски", grad("#2b4287", (.2, "#4165ce"), (.5, "#4a73ea"), "#2b4287"), mana_left),
-             image("mp.fillImg", "Картинка на заливке", [mana_left], "", "cover"),
+             image("mp.fillImg", "Картинка на заливке", [mana_left], "", "cover", game_sized=False),
              fill("mp.track", "Цвет пустой части", grad("#101932", (.2, "#172447"), (.5, "#162244"), "#101932"), mana_right),
              num("mp.height", "Высота", 26, 8, 60, [{**emit(HEALTH, ".Reborn #ManaContainer"), "prop": "height"}]),
              _bar_radius("mp.radius", mana_left, mana_right),
@@ -100,8 +100,12 @@ def abilities():
         *sub("Тень по краям фона",
              image("ab.inset", "Тень у краёв", [emit(REBORN, ".AbilityInsetShadowLeft", ".AbilityInsetShadowRight")],
                    REBORN_IMG + "ability_inset_shadow_psd.png")),
+        *sub("Метки уровней под кнопками",
+             fill("ab.pipOn", "Взятые уровни", grad("#E7D291", "#887845"), emit(ABILITY, ".Reborn .active_level.LevelPanel")),
+             fill("ab.pipOff", "Пустые уровни", grad("#111111", "#000000"), emit(ABILITY, ".Reborn .LevelPanel"))),
         *sub("Положение", block("ab", "#AbilitiesAndStatBranch",
-                                   carry=(*TALENT_HINT, emit(REBORN, "#HUDSkinAbilityContainerBG", sum=["ab.offset"])))),
+                                   carry=(*TALENT_HINT, *HIDE_INSET,
+                                          emit(REBORN, "#HUDSkinAbilityContainerBG", sum=["ab.offset"])))),
     ]
 
 
@@ -113,7 +117,7 @@ def talents():
              texture("innate.frame", "Рамка под иконкой", [FACETS_IMG + "innate_frame_png"]),
              num("innate.size", "Размер иконки", 38, 20, 80,
                  [{**emit(INNATE, "#InnateIcon"), "prop": prop} for prop in ("width", "height")])),
-        *sub("Положение врождённой", block("innate", ".RootInnateDisplay", file=INNATE)),
+        *sub("Положение врождённой", block("innate", ".RootInnateDisplay", file=INNATE, in_row=True)),
         *sub("Дерево талантов",
              texture("talent.bg", "Круг под деревом", [REBORN_IMG + "statbranch_button_bg_psd"]),
              texture("talent.tree", "Ствол и пустые листья дерева", [REBORN_IMG + "statbranch_button_bg_all_off_psd"],
@@ -124,7 +128,7 @@ def talents():
                    emit(STATBRANCH, "#AttributePipsContainer #AttributePips"), "background-color"),
              image("talent.pipsBg", "Пустые метки", [emit(STATBRANCH, "#AttributePipsContainer")],
                    HUD_IMG + "attributes_pips_background_7_png.png")),
-        *sub("Положение талантов", block("talent", "#StatBranch", carry=TALENT_HINT)),
+        *sub("Положение талантов", block("talent", "#StatBranch", carry=TALENT_HINT, in_row=True)),
         *sub("Аганим и осколок",
              image("aghs.scepter", "Скипетр, нет", [emit(AGHS, "#AghsStatusScepter")],
                    REBORN_IMG + "aghsstatus_scepter_psd.png", "contain"),
@@ -134,7 +138,7 @@ def talents():
                    REBORN_IMG + "aghsstatus_shard_psd.png", "contain"),
              image("aghs.shardOn", "Осколок, есть", [emit(AGHS, "#AghsStatusContainer.HasShard #AghsStatusShard")],
                    REBORN_IMG + "aghsstatus_shard_on_psd.png", "contain")),
-        *sub("Положение аганима", block("aghs", "#AghsStatusContainer", file=AGHS)),
+        *sub("Положение аганима", block("aghs", "#AghsStatusContainer", file=AGHS, in_row=True)),
     ]
 
 
@@ -177,7 +181,7 @@ def inventory():
         *sub("Положение круглых слотов", block("round", "#inventory_composition_layer_container",
                                                         anchor={"side": "right", "margin": 18, "width": 100, "origin": 0.5,
                                                                 "margins": True})),
-        *sub("Положение инвентаря", block("inv", "#inventory",
+        *sub("Положение инвентаря", block("inv", "#inventory", carry=HIDE_INSET,
                                                 anchor={"side": "right", "margin": 93, "width": 202, "origin": 1})),
     ]
 
@@ -215,5 +219,5 @@ def portrait():
         *sub("Урон, броня, скорость", text("stats.label", stats, "#cccccc", 14, hi=28)),
         *sub("Положение", block("por", "#PortraitGroup", also=("#stats_container",),
                                    anchor={"side": "left", "margin": 52, "width": 159, "origin": 0.5},
-                                   carry=PORTRAIT_FOLLOWERS)),
+                                   carry=(*PORTRAIT_FOLLOWERS, *HIDE_INSET))),
     ]

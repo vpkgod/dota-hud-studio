@@ -262,3 +262,21 @@ class RoundSlotsTest(unittest.TestCase):
     def test_no_noclip_anywhere(self):
         css = cssgen.generate({"inv.offset": {"x": -600, "y": 0}, "por.offset": {"x": 600, "y": 0}})["hud/hud_reborn.css"]
         self.assertNotIn("noclip", css)
+
+
+class RowAndDrawerTest(unittest.TestCase):
+    def test_row_block_scale_keeps_layout(self):
+        """ui-scale в ряду способностей раздвигает панель — увеличиваем только вид."""
+        css = cssgen.generate({"innate.scale": 132})
+        self.assertIn("pre-transform-scale2d: 1.32", css["hud/dota_hud_innate_display.css"])
+        self.assertNotIn("ui-scale", css["hud/dota_hud_innate_display.css"])
+        self.assertIn("overflow: noclip", css["hud/hud_reborn.css"])
+
+    def test_drawer_stays_put_for_other_ability_counts(self):
+        css = cssgen.generate({"tree.offset": {"x": -308, "y": 195}})["hud/hud_reborn.css"]
+        self.assertIn(".SixAbilities #StatBranchDrawer\n{\n\ttransform: translateX( -265.5px ) translateY( 195px );", css)
+
+    def test_unsized_panel_gets_preview_size(self):
+        image = {"id": "abcdef0123456789", "fit": "original", "opacity": 1}
+        css = cssgen.generate({"launch.quick": image})["hud/dota_hud_quick_buy.css"]
+        self.assertIn("background-size: 100% 100%", css)

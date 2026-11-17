@@ -19,6 +19,8 @@ STATBRANCH = "hud/dota_hud_stat_branch.css"
 SCOREBOARD = "hud/dota_hud_scoreboard.css"
 GLYPH = "hud/dota_hud_glyph.css"
 RADAR = "dota_hud_radar_button.css"
+ROSHAN = "dota_hud_roshan_timer.css"
+TORMENTOR = "dota_hud_tormentor_timer.css"
 
 REBORN_IMG = "panorama/images/hud/reborn/"
 HUD_IMG = "panorama/images/hud/"
@@ -61,9 +63,12 @@ def toggle(cid, label, target, off="visibility: collapse", default=True):
             "emit": [{**target, "off": off}]}
 
 
-def image(cid, label, targets, preview, fit="100% 100%"):
-    return {"id": cid, "label": label, "type": "image", "default": None, "emit": targets,
-            "preview": preview, "preview_fit": fit}
+def image(cid, label, targets, preview, fit="100% 100%", game_sized=True):
+    """game_sized=False — у панели в игре размер фона не задан (#QuickBuyRows): картинка «как в игре»
+    встала бы своим размером посередине, поэтому для неё пишем размер, как в превью."""
+    control = {"id": cid, "label": label, "type": "image", "default": None, "emit": targets,
+               "preview": preview, "preview_fit": fit}
+    return control if game_sized else {**control, "game_sized": False}
 
 
 def texture(cid, label, game_paths, hint=""):
@@ -91,6 +96,21 @@ def text(cid, target, default_color, default_size, lo=8, hi=48):
 
 
 
+# Тени по краям фона способностей стоят на месте и лежат поверх всего (z-index 800), ловят мышь.
+# Если сдвинуть способности, инвентарь или портрет, тень оказывается на ячейках и мешает перетаскивать
+# предметы — тогда прячем её (visibility: collapse убирает и перехват мыши).
+HIDE_INSET = (emit(REBORN, ".AbilityInsetShadowLeft", ".AbilityInsetShadowRight", raw=["visibility: collapse"]),)
+ROW_HINT = "Игра не рисует блок, унесённый целиком за край ряда способностей: оставьте хотя бы край на ряду."
+# Ряд способностей обрезает то, что вынесли за его края. Слоя с отдельной отрисовкой в нём нет, поэтому
+# noclip здесь безопасен (в отличие от #center_block, где он прячет круглые слоты) — проверено в игре.
+ROW_NOCLIP = (emit(REBORN, "#AbilitiesAndStatBranch", "#AbilitiesAndStatBranch .LeftRightFlow", raw=["overflow: noclip"]),)
+# Ветка талантов (#StatBranchDrawer) в игре сдвигается влево у героев с большим числом способностей:
+# у них больше margin-right при выравнивании по центру. Сдвинутую ветку держим на одном месте экрана:
+# поправка (margin_k − 395) / 2 для каждого класса. Сверено в игре: у Кез (SixAbilities) ветка левее на 42.
+DRAWER_CLASSES = (("FiveAbilities", 430), ("SixAbilities", 480), ("SevenAbilities", 510),
+                  ("EightAbilities", 506), ("NineAbilities", 564))
+DRAWER_KEEP = tuple(emit(REBORN, f".{name} #StatBranchDrawer", sum=["tree.offset"], dx=(margin - 395) / 2)
+                    for name, margin in DRAWER_CLASSES)
 # Свечение «можно взять талант» и подсказка клавиши стоят в игре на месте кнопки талантов, но вне полосы
 # способностей: двигаем их на сумму сдвигов полосы и самой кнопки.
 TALENT_HINT = (emit(REBORN, "#level_stats_frame", "#StatBranchHotkey", sum=["ab.offset", "talent.offset"]),)
@@ -104,7 +124,7 @@ def sub(title, *items):
     return [{**control, "sub": title} for control in flat]
 
 
-def block(prefix, selector, scale=True, file=REBORN, lo=40, hi=200, also=(), anchor=None, carry=()):
+def block(prefix, selector, scale=True, file=REBORN, lo=40, hi=200, also=(), anchor=None, carry=(), in_row=False):
     """Общие настройки блока: размер, положение, видимость, показ.
 
     also — панели, которые в игре лежат отдельно, но на экране составляют один блок с этой
@@ -112,6 +132,9 @@ def block(prefix, selector, scale=True, file=REBORN, lo=40, hi=200, also=(), anc
     он ломает слой с круглыми слотами (require-composition-layer) — проверено в игре.
     anchor — у какого края нижней панели блок стоит в игре: {"side", "margin", "width"}. Ширина панели
     зависит от числа способностей героя, поэтому блок, унесённый за середину, привязываем к другому краю.
+    in_row — блок стоит в ряду способностей (кнопка талантов, врождённая, аганим). ui-scale меняет его
+    место в ряду и раздвигает всю нижнюю панель — увеличиваем через pre-transform-scale2d (только вид),
+    а ряд не обрезаем, чтобы унесённый за его край блок был виден (проверено в игре).
     carry — панели, которые в игре стоят отдельно, но должны ехать вместе с блоком; у каждой "sum" —
     чьи сдвиги складываются (подсказка «возьми талант» едет и за способностями, и за кнопкой талантов).
     """
@@ -125,10 +148,16 @@ def block(prefix, selector, scale=True, file=REBORN, lo=40, hi=200, also=(), anc
     controls = []
     if scale:
         followers = [t for t in carry if "lead" in t]
-        controls.append(num(f"{prefix}.scale", "Размер блока", 100, lo, hi,
-                            [{**target, "prop": "ui-scale"}, *followers], unit="%"))
+        if in_row:
+            carry = (*carry, *ROW_NOCLIP)
+            controls.append(num(f"{prefix}.scale", "Размер блока", 100, lo, hi,
+                                [{**target, "prop": "pre-transform-scale2d"}, *ROW_NOCLIP], unit="", div=100))
+        else:
+            controls.append(num(f"{prefix}.scale", "Размер блока", 100, lo, hi,
+                                [{**target, "prop": "ui-scale"}, *followers], unit="%"))
     controls.append({"id": f"{prefix}.offset", "label": "Положение на экране", "type": "offset",
                      "default": {"x": 0, "y": 0}, "min": -1400, "max": 1400,
+                     **({"hint": ROW_HINT} if in_row else {}),
                      "emit": [{**target, "prop": "transform", **({"anchor": anchor} if anchor else {})},
                               *carry]})
     controls.append(num(f"{prefix}.opacity", "Видимость", 100, 0, 100,

@@ -62,6 +62,30 @@ export function applyValues(stage, catalog, values, imageUrl) {
   }
   clearCoveredShopPanels(stage, catalog, values);
   showChosenTalentColor(stage, catalog, values);
+  hideInsetShadows(stage, values);
+  requestAnimationFrame(() => cullOutsideRow(stage));
+}
+
+// Блок ряда способностей (таланты, врождённая, аганим), унесённый целиком за край ряда, игра не рисует
+// вовсе — даже с overflow: noclip. Проверено в игре: врождённая на +370 пропадает. Показываем так же.
+function cullOutsideRow(stage) {
+  const row = stage.querySelector('.center .abilities');
+  if (!row) return;
+  const r = row.getBoundingClientRect();
+  row.querySelectorAll('.talent, .innate, .aghs').forEach((block) => {
+    block.classList.remove('culled');
+    const b = block.getBoundingClientRect();
+    const touches = b.right > r.left && b.left < r.right && b.bottom > r.top && b.top < r.bottom;
+    block.classList.toggle('culled', !touches);
+  });
+}
+
+// Тени по краям фона способностей игра прячет (наше правило), когда сдвинуты способности, инвентарь
+// или портрет: иначе тень ложится на ячейки и ловит мышь.
+const INSET_MOVERS = ['ab.offset', 'inv.offset', 'por.offset'];
+function hideInsetShadows(stage, values) {
+  const moved = INSET_MOVERS.some((id) => values[id] && (values[id].x || values[id].y));
+  stage.classList.toggle('inset-hidden', moved);
 }
 
 // Выбранные таланты игра рисует светлым #E7D291, а не цветом из своего правила (#E7D29188).
@@ -163,9 +187,9 @@ function mapUnit([x, y, hero, side, turn], icons, ring) {
     </span>`;
 }
 
-function timerButton(kind, bg, icon) {
+function timerButton(kind, bgId, icon) {
   return `
-    <div class="mm-timer ${kind}" style="background-image:url('${game(bg)}')">
+    <div class="mm-timer ${kind}" data-c="${bgId}">${img(bgId)}
       <span><img src="${game(icon)}" alt="" draggable="false"><i></i></span>
     </div>`;
 }
@@ -189,8 +213,8 @@ function minimap(assets) {
       </div>
     </div>
     <div class="mm-side">
-      ${timerButton('roshan', ui.roshanBg, ui.roshan)}
-      ${timerButton('tormentor', ui.tormentorBg, ui.tormentor)}
+      ${timerButton('roshan', 'minimap.roshanBg', ui.roshan)}
+      ${timerButton('tormentor', 'minimap.tormentorBg', ui.tormentor)}
     </div>
     <div class="glyph" data-b="glyph" data-tab="minimap" data-c="minimap.glyph">${img('minimap.glyph')}
       <span class="mm-round scan"><i class="on" data-c="minimap.scan">${img('minimap.scan')}</i><i class="off" data-c="minimap.scanOff">${img('minimap.scanOff')}</i><b>2</b></span>

@@ -30,8 +30,8 @@ def opened():
     placeholder = emit(SHOP, "DOTAHUDShopTextEntry #PlaceholderText")
     return [
         *sub("Фон магазина",
-             image("shop.bgAll", "Картинка на весь магазин", _whole_shop_targets(), "", "cover"),
-             image("shop.bg", "Картинка за предметами", [emit(SHOP, "#HeightLimiterContainer")], "", "cover"),
+             image("shop.bgAll", "Картинка на весь магазин", _whole_shop_targets(), "", "cover", game_sized=False),
+             image("shop.bg", "Картинка за предметами", [emit(SHOP, "#HeightLimiterContainer")], "", "cover", game_sized=False),
              fill("shop.color", "Цвет за предметами", grad("#1e1f22", "#070708"), emit(SHOP, "#HeightLimiterContainer"))),
         *sub("Строка поиска",
              color("shop.searchRow", "Фон строки", "#000000", emit(SHOP, "#SearchAndButtonsContainer"), "background-color"),
@@ -55,7 +55,7 @@ def opened():
                    REBORN_IMG + "bg_pinned_items_psd.png", "cover"),
              fill("shop.pinned", "Цвет", grad("#1c2027", "#010101"), emit(SHOP, "#PinnedItems"))),
         *sub("Сборка предмета",
-             image("shop.combinesImg", "Картинка", [emit(SHOP, "#ItemCombines")], "", "cover"),
+             image("shop.combinesImg", "Картинка", [emit(SHOP, "#ItemCombines")], "", "cover", game_sized=False),
              color("shop.combines", "Цвет", "#1c262fb2", emit(SHOP, "#ItemCombines"), "background-color")),
         *sub("Гайд слева",
              image("shop.guideBg", "Картинка", [emit(ITEMBUILD, "#ItemBuildBackground")],
@@ -70,7 +70,8 @@ def launcher():
     gold = emit(QUICKBUY, ".ShopButtonValueLabel")
     return [
         *sub("Быстрая покупка",
-             image("launch.quick", "Фон", [emit(QUICKBUY, ".Reborn #QuickBuyRows")], REBORN_IMG + "quickbuy_bg_psd.png"),
+             image("launch.quick", "Фон", [emit(QUICKBUY, ".Reborn #QuickBuyRows")], REBORN_IMG + "quickbuy_bg_psd.png",
+                   game_sized=False),
              color("quick.color", "Цвет под картинкой", "#252627ac", emit(QUICKBUY, "#QuickBuyRows"), "background-color")),
         *sub("Положение быстрой покупки", block("quick", "#QuickBuyRows", file=QUICKBUY)),
         *sub("Панель золота",

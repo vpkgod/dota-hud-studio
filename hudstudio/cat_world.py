@@ -1,6 +1,6 @@
 """Настройки вне нижней панели: мини-карта, верхняя панель, баффы и весь худ целиком."""
 
-from .cat_helpers import (BUFF, GLYPH, RADAR, REBORN, REBORN_IMG, TOPBAR, block, color, emit, image, num, sub, text)
+from .cat_helpers import (BUFF, GLYPH, RADAR, REBORN, REBORN_IMG, ROSHAN, TOPBAR, TORMENTOR, block, color, emit, image, num, sub, text)
 
 # В Dota есть настройка «крупная мини-карта»: её правила сильнее простого #minimap,
 # поэтому размер пишем во все три варианта.
@@ -40,7 +40,11 @@ def minimap():
                    REBORN_IMG + "icon_glyph_on_psd.png"),
              image("minimap.glyphOff", "Глиф на перезарядке",
                    [emit(GLYPH, ".CoolingDown #GlyphButton", ".CoolingDown #RadiantGlyphButton", ".CoolingDown #DireGlyphButton")],
-                   REBORN_IMG + "icon_glyph_off_psd.png")),
+                   REBORN_IMG + "icon_glyph_off_psd.png"),
+             image("minimap.roshanBg", "Рамка таймера Рошана", [emit(ROSHAN, "DOTARoshanTimer")],
+                   REBORN_IMG + "roshan_timer_bg_v2_png.png", "cover"),
+             image("minimap.tormentorBg", "Рамка таймера Терзателя", [emit(TORMENTOR, "DOTATormentorTimer")],
+                   REBORN_IMG + "tormentor_timer_bg_v2_png.png", "cover")),
         *sub("Положение глифа", block("glyph", "#GlyphScanContainer", scale=False)),
     ]
 

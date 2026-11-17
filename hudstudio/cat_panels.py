@@ -3,7 +3,7 @@
 Селекторы взяты из dota_hud_stat_branch.css и dota_hud_scoreboard.css.
 """
 
-from .cat_helpers import (REBORN, REBORN_IMG, SCOREBOARD, STATBRANCH, block, color, emit, fill, grad, image, num,
+from .cat_helpers import (DRAWER_KEEP, REBORN, REBORN_IMG, SCOREBOARD, STATBRANCH, block, color, emit, fill, grad, image, num,
                           outline, sub, text, texture)
 
 # .ScoreboardClosed задаёт анимацию закрытия: правила блока действуют только на открытую таблицу.
@@ -48,7 +48,7 @@ def talent_tree():
              texture("tree.pip15", "15 уровень", [REBORN_IMG + "statbranch_button_pip15_psd"]),
              texture("tree.pip20", "20 уровень", [REBORN_IMG + "statbranch_button_pip20_psd"]),
              texture("tree.pip25", "25 уровень", [REBORN_IMG + "statbranch_button_pip25_psd"])),
-        *sub("Положение", block("tree", "#StatBranchDrawer", file=REBORN)),
+        *sub("Положение", block("tree", "#StatBranchDrawer", file=REBORN, carry=DRAWER_KEEP)),
     ]
 
 
