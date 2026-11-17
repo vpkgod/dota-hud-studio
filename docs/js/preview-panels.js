@@ -1,12 +1,13 @@
 // Окна поверх игры в превью: ветка талантов и таблица по Tab.
 import { game, img } from './preview-shop.js';
+import { t } from './i18n.js';
 
 // Таланты Juggernaut, как на скриншоте игры. chosen — какая сторона взята; у строки 25 очко ещё не потрачено.
 const TALENTS = [
-  { level: 25, left: '40% вампиризма от Blade Dance', right: '+1 сек. действия Omnislash', chosen: null },
-  { level: 20, left: '+120 к урону в секунду от Blade Fury', right: '+15% к критическому урону от Blade Dance', chosen: 'left' },
-  { level: 15, left: 'Blade Fury ускоряет передвижение на 45', right: '−15 сек. перезарядки Omnislash', chosen: 'right' },
-  { level: 10, left: '−1 сек. для получения одного эффекта Bladeform', right: '−12 сек. перезарядки Healing Ward', chosen: 'left' },
+  { level: 25, left: t('40% вампиризма от Blade Dance'), right: t('+1 сек. действия Omnislash'), chosen: null },
+  { level: 20, left: t('+120 к урону в секунду от Blade Fury'), right: t('+15% к критическому урону от Blade Dance'), chosen: 'left' },
+  { level: 15, left: t('Blade Fury ускоряет передвижение на 45'), right: t('−15 сек. перезарядки Omnislash'), chosen: 'right' },
+  { level: 10, left: t('−1 сек. для получения одного эффекта Bladeform'), right: t('−12 сек. перезарядки Healing Ward'), chosen: 'left' },
 ];
 const STAT_PIPS = 7;
 
@@ -44,13 +45,13 @@ export function treePanel() {
       <div class="tree-center">
         <i class="tree-bg pinned" data-c="tree.bg">${img('tree.bg')}</i>
         <i class="tree-bg tip" data-c="tree.bgTip">${img('tree.bgTip')}</i>
-        <b class="tree-title pinned" data-c="tree.title">Выберите талант</b>
-        <b class="tree-title tip" data-c="tree.title">Древо талантов</b>
+        <b class="tree-title pinned" data-c="tree.title">${t('Выберите талант')}</b>
+        <b class="tree-title tip" data-c="tree.title">${t('Древо талантов')}</b>
         ${TALENTS.map(talentRow).join('')}
         ${TALENTS.map(levelBadge).join('')}
       </div>
       <div class="tree-stat" data-c="tree.stat">${img('tree.stat')}
-        <span>+2 ко всем атрибутам</span>
+        <span>${t('+2 ко всем атрибутам')}</span>
         <span class="tree-stat-pips">${pips}</span>
       </div>
     </div>`;
@@ -86,7 +87,7 @@ function playerRow(src, index, assets) {
       <i class="sb-avatar"></i>
       <img class="sb-hero" src="${game(src)}" alt="" draggable="false" data-c="board.imageW">
       <span class="sb-names">
-        <b class="sb-player" data-c="board.player">Игрок ${index + 1}</b>
+        <b class="sb-player" data-c="board.player">${t('Игрок {n}', { n: index + 1 })}</b>
         <small class="sb-heroname" data-c="board.hero">${prettyHero(src)}</small>
       </span>
       <i class="sb-aghs"><i class="sb-aghs-s">${img('aghs.scepter')}</i><i class="sb-aghs-h">${img('aghs.shard')}</i></i>
@@ -107,19 +108,19 @@ function playerRow(src, index, assets) {
 function header(side, score, assets) {
   const radiant = side === 'radiant';
   const columns = radiant ? `
-      <span class="sb-sub lvl" data-c="board.header">ур.</span>
-      <span class="sb-sub gold" data-c="board.header">золото</span>
-      <span class="sb-sub kda first" data-c="board.header">у</span>
-      <span class="sb-sub kda" data-c="board.header">с</span>
-      <span class="sb-sub kda" data-c="board.header">п</span>
-      <span class="sb-sub ult" data-c="board.header">ульт</span>` : '<span class="sb-sub-gap"></span>';
+      <span class="sb-sub lvl" data-c="board.header">${t('ур.')}</span>
+      <span class="sb-sub gold" data-c="board.header">${t('золото')}</span>
+      <span class="sb-sub kda first" data-c="board.header">${t('у')}</span>
+      <span class="sb-sub kda" data-c="board.header">${t('с')}</span>
+      <span class="sb-sub kda" data-c="board.header">${t('п')}</span>
+      <span class="sb-sub ult" data-c="board.header">${t('ульт')}</span>` : '<span class="sb-sub-gap"></span>';
   return `
     <div class="sb-head ${side}">
       <b class="sb-score" data-c="board.score">${score}</b>
-      <b class="sb-team" data-c="board.team">${radiant ? 'Свет' : 'Тьма'}</b>
+      <b class="sb-team" data-c="board.team">${radiant ? t('Свет') : t('Тьма')}</b>
       ${columns}
       <span class="sb-report head">
-        <span class="sb-report-text"><b>Жалобы</b><small>${radiant ? 'Силы Света' : 'Силы Тьмы'}</small></span>
+        <span class="sb-report-text"><b>${t('Жалобы')}</b><small>${radiant ? t('Силы Света') : t('Силы Тьмы')}</small></span>
         <img src="${game(assets.ui.teamMute)}" alt="" draggable="false">
       </span>
     </div>`;

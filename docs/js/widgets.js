@@ -4,6 +4,7 @@
 import { same } from './build/cssgen.js';
 import { openColorPop } from './colorpop.js';
 import { button, h, icon } from './dom.js';
+import { t } from './i18n.js';
 
 const HEX = /^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/;
 const cssGradient = (fill) => `linear-gradient(${fill.dir === 'v' ? 'to bottom' : 'to right'},${fill.stops.map((s) => `${s.c} ${s.p * 100}%`).join(',')})`;
@@ -12,10 +13,10 @@ const cssGradient = (fill) => `linear-gradient(${fill.dir === 'v' ? 'to bottom' 
 function colorField(value, onChange, label) {
   let current = value;
   const face = h('i');
-  const hex = h('input', { class: 'hex', value, spellcheck: false, maxLength: 9, 'aria-label': `${label}: код цвета` });
+  const hex = h('input', { class: 'hex', value, spellcheck: false, maxLength: 9, 'aria-label': t('{label}: код цвета', { label }) });
   const paint = () => { face.style.background = current; if (document.activeElement !== hex) hex.value = current; };
   const pick = (next) => { current = next; paint(); onChange(next); };
-  const swatch = button('swatch', '', () => openColorPop(swatch, current, pick), { title: 'Выбрать цвет', 'aria-label': label });
+  const swatch = button('swatch', '', () => openColorPop(swatch, current, pick), { title: t('Выбрать цвет'), 'aria-label': label });
   swatch.append(face);
   hex.addEventListener('change', () => {
     const text = hex.value.trim();
@@ -28,7 +29,7 @@ function colorField(value, onChange, label) {
 /** Ползунок и поле с числом. */
 function numberField({ min, max, step = 1, unit = '' }, value, onChange, label) {
   const range = h('input', { type: 'range', min, max, step, value, 'aria-label': label });
-  const box = h('input', { type: 'number', class: 'numbox', min, max, step, value, 'aria-label': `${label}: число` });
+  const box = h('input', { type: 'number', class: 'numbox', min, max, step, value, 'aria-label': t('{label}: число', { label }) });
   const apply = (raw, source) => {
     const n = Number(raw);
     if (raw === '' || !Number.isFinite(n)) return;
@@ -46,7 +47,7 @@ function numberField({ min, max, step = 1, unit = '' }, value, onChange, label) 
 function switchField(checked, onChange, label) {
   const box = h('input', { type: 'checkbox', checked, 'aria-label': label });
   const text = h('span', { class: 'switch-text' });
-  const paint = () => { text.textContent = box.checked ? 'Да' : 'Нет'; };
+  const paint = () => { text.textContent = box.checked ? t('Да') : t('Нет'); };
   box.addEventListener('change', () => { paint(); onChange(box.checked); });
   paint();
   return { node: h('label', { class: 'switch' }, box, h('i'), text), set(next) { box.checked = next; paint(); } };
@@ -83,8 +84,8 @@ function shadowWidget(control, value, change) {
   let current = value;
   const emit = (patch) => { current = { ...current, ...patch }; paint(); change(current); };
   const on = switchField(value.on, (next) => emit({ on: next }), control.label);
-  const color = colorField(value.c, (c) => emit({ c }), `${control.label}: цвет`);
-  const width = numberField({ min: 1, max: 8, unit: 'px' }, value.w, (w) => emit({ w }), `${control.label}: толщина`);
+  const color = colorField(value.c, (c) => emit({ c }), t('{label}: цвет', { label: control.label }));
+  const width = numberField({ min: 1, max: 8, unit: 'px' }, value.w, (w) => emit({ w }), t('{label}: толщина', { label: control.label }));
   const details = h('span', { class: 'shadow-details' }, color.node, width.node);
   const paint = () => details.classList.toggle('is-off', !current.on);
   paint();
@@ -108,11 +109,11 @@ function offsetWidget(control, value, change) {
     });
     return { box, node: h('label', { class: 'axis' }, h('span', { text: label }), box, h('span', { class: 'unit', text: 'px' })) };
   };
-  const x = axis('x', 'Вправо');
-  const y = axis('y', 'Вниз');
+  const x = axis('x', t('Вправо'));
+  const y = axis('y', t('Вниз'));
   return {
     node: h('div', { class: 'stack' }, h('span', { class: 'offset-fields' }, x.node, y.node),
-      h('small', { class: 'row-hint', text: 'Проще перетащить сам блок мышью в превью. Стрелки на клавиатуре двигают точно.' })),
+      h('small', { class: 'row-hint', text: t('Проще перетащить сам блок мышью в превью. Стрелки на клавиатуре двигают точно.') })),
     sync(next) { current = next; x.box.value = next.x; y.box.value = next.y; },
   };
 }
@@ -133,33 +134,33 @@ export function fillWidget(control, value, change) {
   function stopRow(index) {
     const stop = current.stops[index];
     const replace = (patch) => setStops(current.stops.map((s, i) => (i === index ? { ...s, ...patch } : s)));
-    const color = colorField(stop.c, (c) => replace({ c }), `Цвет ${index + 1}`);
+    const color = colorField(stop.c, (c) => replace({ c }), t('Цвет {n}', { n: index + 1 }));
     const middle = index > 0 && index < current.stops.length - 1;
-    if (!middle) return h('div', { class: 'stop' }, color.node, h('span', { class: 'stop-edge', text: index === 0 ? 'начало' : 'конец' }));
-    const pos = h('input', { type: 'range', min: 1, max: 99, value: Math.round(stop.p * 100), title: 'Где начинается этот цвет', 'aria-label': 'Где начинается этот цвет' });
+    if (!middle) return h('div', { class: 'stop' }, color.node, h('span', { class: 'stop-edge', text: index === 0 ? t('начало') : t('конец') }));
+    const pos = h('input', { type: 'range', min: 1, max: 99, value: Math.round(stop.p * 100), title: t('Где начинается этот цвет'), 'aria-label': t('Где начинается этот цвет') });
     pos.addEventListener('input', () => replace({ p: Number(pos.value) / 100 }));
-    const remove = button('link', 'убрать', () => setStops(current.stops.filter((_, i) => i !== index), true));
+    const remove = button('link', t('убрать'), () => setStops(current.stops.filter((_, i) => i !== index), true));
     return h('div', { class: 'stop' }, color.node, pos, remove);
   }
 
   function render() {
-    const modes = segmented([['solid', 'Один цвет'], ['grad', 'Переход']], mode, (next) => {
+    const modes = segmented([['solid', t('Один цвет')], ['grad', t('Переход')]], mode, (next) => {
       mode = next;
       const first = current.stops[0].c;
       const last = current.stops[current.stops.length - 1].c;
       if (next === 'solid') setStops([{ p: 0, c: first }, { p: 1, c: first }], true);
       else setStops([{ p: 0, c: first }, { p: 1, c: last === first ? '#000000' : last }], true);
-    }, 'Вид заливки');
+    }, t('Вид заливки'));
     const parts = [h('div', { class: 'fill-head' }, bar, modes.node)];
     if (mode === 'solid') {
       const color = colorField(current.stops[0].c, (c) => setStops([{ p: 0, c }, { p: 1, c }]), control.label);
       parts.push(color.node);
     } else {
-      const direction = segmented([['v', 'Сверху вниз'], ['h', 'Слева направо']], current.dir,
-        (dir) => emit({ dir, stops: current.stops }, false), 'Направление');
+      const direction = segmented([['v', t('Сверху вниз')], ['h', t('Слева направо')]], current.dir,
+        (dir) => emit({ dir, stops: current.stops }, false), t('Направление'));
       parts.push(direction.node, ...current.stops.map((_, i) => stopRow(i)));
       if (current.stops.length < MAX_STOPS) {
-        parts.push(button('link', '+ добавить цвет', () => {
+        parts.push(button('link', t('+ добавить цвет'), () => {
           const end = current.stops.length - 1;
           const inserted = { p: (current.stops[end - 1].p + 1) / 2, c: current.stops[end].c };
           setStops([...current.stops.slice(0, end), inserted, current.stops[end]], true);
@@ -179,7 +180,7 @@ export const DEFAULT_TINT = {
   fill: { dir: 'v', stops: [{ p: 0, c: STRONG_RED }, { p: 1, c: STRONG_RED }] }, mode: 'keep', strength: 100, bright: 0,
 };
 const TINT_DELAY_MS = 120;
-const FITS = [['stretch', 'Растянуть'], ['cover', 'Заполнить'], ['contain', 'Вписать']];
+const FITS = [['stretch', t('Растянуть')], ['cover', t('Заполнить')], ['contain', t('Вписать')]];
 
 /**
  * Картинка: своя вместо оригинала, как её вписать, прозрачность и перекраска.
@@ -209,9 +210,9 @@ function imageWidget(control, value, change, tools) {
 
   function thumb() {
     const url = sourceUrl();
-    const box = button('thumb', '', chooseFile, { title: 'Нажми или перетащи сюда картинку', 'aria-label': `${control.label}: выбрать картинку` });
+    const box = button('thumb', '', chooseFile, { title: t('Нажми или перетащи сюда картинку'), 'aria-label': t('{label}: выбрать картинку', { label: control.label }) });
     if (url) box.style.backgroundImage = `url("${url}")`;
-    else box.append(h('span', { text: 'нет картинки' }));
+    else box.append(h('span', { text: t('нет картинки') }));
     box.addEventListener('dragover', (e) => { e.preventDefault(); box.classList.add('over'); });
     box.addEventListener('dragleave', () => box.classList.remove('over'));
     box.addEventListener('drop', (e) => { e.preventDefault(); box.classList.remove('over'); pick(e.dataTransfer.files[0]); });
@@ -221,9 +222,9 @@ function imageWidget(control, value, change, tools) {
   function gallery() {
     const ids = tools.uploads();
     if (!ids.length) return null;
-    return h('div', { class: 'gallery' }, h('small', { text: 'Уже загруженные:' }), ids.map((id) => {
+    return h('div', { class: 'gallery' }, h('small', { text: t('Уже загруженные:') }), ids.map((id) => {
       const active = current && (current.id === id || current.base === id);
-      const item = button(active ? 'on' : '', '', () => emit(placed(id)), { title: 'Поставить эту картинку', 'aria-label': 'Поставить эту картинку' });
+      const item = button(active ? 'on' : '', '', () => emit(placed(id)), { title: t('Поставить эту картинку'), 'aria-label': t('Поставить эту картинку') });
       item.style.backgroundImage = `url("${tools.imageUrl(id)}")`;
       return item;
     }));
@@ -243,33 +244,33 @@ function imageWidget(control, value, change, tools) {
         node.querySelector('.thumb').style.backgroundImage = `url("${tools.imageUrl(next.id)}")`;
       }), TINT_DELAY_MS);
     };
-    const fill = fillWidget({ label: 'Цвет картинки' }, draft.fill, (next) => update({ fill: next }));
-    const mode = segmented([['keep', 'Сохранить рисунок'], ['flood', 'Залить целиком']], draft.mode, (next) => update({ mode: next }), 'Способ перекраски');
-    const strength = numberField({ min: 0, max: 100, unit: '%' }, draft.strength, (n) => update({ strength: n }), 'Сила цвета');
-    const bright = numberField({ min: -100, max: 100 }, draft.bright, (n) => update({ bright: n }), 'Светлее или темнее');
+    const fill = fillWidget({ label: t('Цвет картинки') }, draft.fill, (next) => update({ fill: next }));
+    const mode = segmented([['keep', t('Сохранить рисунок')], ['flood', t('Залить целиком')]], draft.mode, (next) => update({ mode: next }), t('Способ перекраски'));
+    const strength = numberField({ min: 0, max: 100, unit: '%' }, draft.strength, (n) => update({ strength: n }), t('Сила цвета'));
+    const bright = numberField({ min: -100, max: 100 }, draft.bright, (n) => update({ bright: n }), t('Светлее или темнее'));
     return h('div', { class: 'tint' },
-      h('div', { class: 'tint-title' }, h('b', { text: 'Перекраска' }), button('link', 'убрать перекраску', () => emit(tools.untinted(current)))),
+      h('div', { class: 'tint-title' }, h('b', { text: t('Перекраска') }), button('link', t('убрать перекраску'), () => emit(tools.untinted(current)))),
       fill.node, mode.node,
       h('div', { class: 'pair' },
-        h('label', { class: 'mini' }, h('span', { text: 'Сила цвета' }), strength.node),
-        h('label', { class: 'mini' }, h('span', { text: 'Светлее / темнее' }), bright.node)));
+        h('label', { class: 'mini' }, h('span', { text: t('Сила цвета') }), strength.node),
+        h('label', { class: 'mini' }, h('span', { text: t('Светлее / темнее') }), bright.node)));
   }
 
   function render() {
     const canTint = (current || control.preview) && !current?.tint;
     const actions = h('div', { class: 'image-actions' },
-      button('ghost', current ? 'Заменить' : 'Загрузить свою', chooseFile),
-      canTint ? button('ghost', 'Перекрасить', () => tools.tint(control, current, DEFAULT_TINT, emit), { title: 'Задать картинке свой цвет, сохранив её рисунок' }) : null,
-      current ? button('link', 'вернуть оригинал', () => emit(null)) : null);
+      button('ghost', current ? t('Заменить') : t('Загрузить свою'), chooseFile),
+      canTint ? button('ghost', t('Перекрасить'), () => tools.tint(control, current, DEFAULT_TINT, emit), { title: t('Задать картинке свой цвет, сохранив её рисунок') }) : null,
+      current ? button('link', t('вернуть оригинал'), () => emit(null)) : null);
     const side = [actions];
     const tuning = [];
     if (current && !control.fixed && current.fit !== 'original') {
-      tuning.push(segmented(FITS, current.fit, (fit) => { current = { ...current, fit }; change(current); }, 'Как вписать картинку').node);
+      tuning.push(segmented(FITS, current.fit, (fit) => { current = { ...current, fit }; change(current); }, t('Как вписать картинку')).node);
     }
     if (current && !control.fixed) {
       const opacity = numberField({ min: 0, max: 100, unit: '%' }, Math.round(current.opacity * 100),
-        (n) => { current = { ...current, opacity: n / 100 }; change(current); }, 'Видимость картинки');
-      tuning.push(h('label', { class: 'mini' }, h('span', { text: 'Видимость' }), opacity.node));
+        (n) => { current = { ...current, opacity: n / 100 }; change(current); }, t('Видимость картинки'));
+      tuning.push(h('label', { class: 'mini' }, h('span', { text: t('Видимость') }), opacity.node));
     }
     if (tuning.length) side.push(...tuning);
     const picked = gallery();
@@ -300,13 +301,13 @@ export function createRow(control, { value, change, tools, crumb, onHover }) {
   };
   const widget = WIDGETS[control.type](control, value, (next) => { seen = next; mark(); change(next); }, tools);
   const reset = button('row-reset', '', () => { seen = control.default; widget.sync(seen); mark(); change(seen); },
-    { title: 'Вернуть как в игре', 'aria-label': `Вернуть как в игре: ${control.label}` });
+    { title: t('Вернуть как в игре'), 'aria-label': t('Вернуть как в игре: {label}', { label: control.label }) });
   reset.append(icon('replay'));
   const label = h('div', { class: 'row-label' },
     crumb ? h('span', { class: 'crumb', text: crumb }) : null,
     h('span', { class: 'row-name', text: control.label }),
     control.hint ? h('small', { class: 'row-hint', text: control.hint }) : null,
-    control.game_only ? h('span', { class: 'tag', text: 'видно только в игре', title: 'В превью этого состояния нет: результат будет виден в самой Dota.' }) : null);
+    control.game_only ? h('span', { class: 'tag', text: t('видно только в игре'), title: t('В превью этого состояния нет: результат будет виден в самой Dota.') }) : null);
   const node = h('div', { class: `row type-${control.type}`, data: { id: control.id } }, label, h('div', { class: 'row-body' }, widget.node), reset);
   if (onHover) {
     node.addEventListener('pointerenter', () => onHover(control.id));

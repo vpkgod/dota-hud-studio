@@ -1,5 +1,6 @@
 // Меню слева: крупные разделы, внутри них части худа со счётчиками изменений.
 import { button, h, icon } from './dom.js';
+import { t } from './i18n.js';
 
 // Иконка каждого раздела; у открытого раздела она залитая.
 const ICONS = {
@@ -10,7 +11,7 @@ const ICONS = {
 
 export function createNav({ root, areas, groups, onGroup, onChanges, onSearch }) {
   const items = new Map();
-  const search = h('input', { type: 'search', class: 'nav-search', placeholder: 'Найти настройку', 'aria-label': 'Поиск настроек' });
+  const search = h('input', { type: 'search', class: 'nav-search', placeholder: t('Найти настройку'), 'aria-label': t('Поиск настроек') });
   search.addEventListener('input', () => onSearch(search.value.trim()));
 
   function item(id, title, onclick) {
@@ -26,10 +27,10 @@ export function createNav({ root, areas, groups, onGroup, onChanges, onSearch })
   const list = areas.map((area) => h('div', { class: 'nav-area' },
     h('h2', { text: area.title }),
     groups.filter((g) => g.area === area.id).map((g) => item(g.id, g.title, () => onGroup(g.id)))));
-  const changes = item('__changes', 'Изменения', onChanges);
+  const changes = item('__changes', t('Изменения'), onChanges);
   changes.classList.add('nav-changes');
 
-  root.replaceChildren(search, h('div', { class: 'nav-list' }, list), h('div', { class: 'nav-foot' }, h('h2', { text: 'Проект' }), changes));
+  root.replaceChildren(search, h('div', { class: 'nav-list' }, list), h('div', { class: 'nav-foot' }, h('h2', { text: t('Проект') }), changes));
 
   return {
     /** counts: { idРаздела: числоИзменений }, total — всего. */

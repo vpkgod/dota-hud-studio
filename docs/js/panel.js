@@ -4,9 +4,10 @@ import { same } from './build/cssgen.js';
 import { button, h, icon, plural } from './dom.js';
 import { randomTheme, themeFromColor } from './theme.js';
 import { DEFAULT_TINT, createRow, fillWidget } from './widgets.js';
+import { t } from './i18n.js';
 
 const THEME_COLORS = ['#e53935', '#ff8a3c', '#f4c653', '#58c322', '#1fd6a6', '#22a7f0', '#7a5cff'];
-const settingsWord = (n) => `${n} ${plural(n, 'настройка', 'настройки', 'настроек')}`;
+const settingsWord = (n) => `${n} ${plural(n, t('настройка'), t('настройки'), t('настроек'))}`;
 
 export function createPanel({ root, store, areas, groups, tools, onHover, onView }) {
   const all = groups.flatMap((g) => g.controls);
@@ -45,7 +46,7 @@ export function createPanel({ root, store, areas, groups, tools, onHover, onView
     const reset = button('link', resetLabel, () => resetControls(controls));
     const update = () => {
       const n = controls.filter(isChanged).length;
-      count.textContent = n ? `изменено: ${n}` : '';
+      count.textContent = n ? t('изменено: {n}', { n }) : '';
       count.hidden = !n;
       reset.hidden = !n;
     };
@@ -62,14 +63,14 @@ export function createPanel({ root, store, areas, groups, tools, onHover, onView
       toggle.setAttribute('aria-expanded', String(!collapsed.has(key)));
     }, { 'aria-expanded': String(isOpen) });
     toggle.append(h('i', { class: 'marker' }, icon('expand_more')), h('span', { text: title }));
-    const head = h('header', { class: 'sub-head' }, toggle, controls ? changeTools(controls, 'сбросить') : null);
+    const head = h('header', { class: 'sub-head' }, toggle, controls ? changeTools(controls, t('сбросить')) : null);
     const node = h('section', { class: `sub${isOpen ? '' : ' closed'}`, data: { sub: title } }, head, h('div', { class: 'sub-body' }, content));
     return node;
   }
 
   /** Быстрые действия раздела «Весь худ»: перекраска худа и всех картинок одним цветом. */
   function quickStart() {
-    const custom = h('input', { type: 'color', value: '#22a7f0', 'aria-label': 'Любой цвет' });
+    const custom = h('input', { type: 'color', value: '#22a7f0', 'aria-label': t('Любой цвет') });
     let timer;
     custom.addEventListener('input', () => {
       clearTimeout(timer);
@@ -77,21 +78,21 @@ export function createPanel({ root, store, areas, groups, tools, onHover, onView
     });
     const colors = h('div', { class: 'theme-colors' },
       THEME_COLORS.map((color) => button('', '', () => tools.applyTheme(themeFromColor(color)),
-        { style: { background: color }, 'aria-label': `Перекрасить худ: ${color}` })),
-      h('label', { class: 'custom', title: 'Любой цвет' }, custom),
-      button('ghost', 'Случайный стиль', () => tools.applyTheme(randomTheme())));
-    const bulk = fillWidget({ label: 'Цвет всех картинок' }, bulkFill, (fill) => { bulkFill = fill; });
+        { style: { background: color }, 'aria-label': t('Перекрасить худ: {color}', { color }) })),
+      h('label', { class: 'custom', title: t('Любой цвет') }, custom),
+      button('ghost', t('Случайный стиль'), () => tools.applyTheme(randomTheme())));
+    const bulk = fillWidget({ label: t('Цвет всех картинок') }, bulkFill, (fill) => { bulkFill = fill; });
     return [
-      section('quick.color', 'Весь худ в одном цвете', null, [
-        h('p', { class: 'note', text: 'Полоски, цифры и фон магазина подстроятся под выбранный цвет.' }),
+      section('quick.color', t('Весь худ в одном цвете'), null, [
+        h('p', { class: 'note', text: t('Полоски, цифры и фон магазина подстроятся под выбранный цвет.') }),
         colors,
       ]),
-      section('quick.images', 'Все картинки худа одним цветом', null, [
-        h('p', { class: 'note', text: 'Перекрашивает сразу все картинки: рамки, фоны, кнопки. Рисунок сохраняется.' }),
+      section('quick.images', t('Все картинки худа одним цветом'), null, [
+        h('p', { class: 'note', text: t('Перекрашивает сразу все картинки: рамки, фоны, кнопки. Рисунок сохраняется.') }),
         bulk.node,
         h('div', { class: 'button-row' },
-          button('ghost', 'Перекрасить все картинки', () => tools.tintAll({ ...DEFAULT_TINT, fill: bulkFill })),
-          button('link', 'убрать перекраску со всех', tools.untintAll)),
+          button('ghost', t('Перекрасить все картинки'), () => tools.tintAll({ ...DEFAULT_TINT, fill: bulkFill })),
+          button('link', t('убрать перекраску со всех'), tools.untintAll)),
       ]),
     ];
   }
@@ -112,7 +113,7 @@ export function createPanel({ root, store, areas, groups, tools, onHover, onView
       target.scrollIntoView({ block: 'start', behavior: 'smooth' });
     };
     const chips = names.length > 2
-      ? h('nav', { class: 'chips', 'aria-label': 'Части раздела' }, names.map((name) => {
+      ? h('nav', { class: 'chips', 'aria-label': t('Части раздела') }, names.map((name) => {
         const controls = group.controls.filter((c) => c.sub === name);
         const chip = button('chip', name, () => jump(name));
         counters.push(() => chip.classList.toggle('has-changes', controls.some(isChanged)));
@@ -121,7 +122,7 @@ export function createPanel({ root, store, areas, groups, tools, onHover, onView
       : null;
     const head = h('header', { class: 'page-head' },
       h('p', { class: 'crumbs', text: `${areaTitle[group.area]} / ${group.title}` }),
-      h('div', { class: 'title-row' }, h('h1', { text: group.title }), changeTools(group.controls, 'сбросить весь раздел')),
+      h('div', { class: 'title-row' }, h('h1', { text: group.title }), changeTools(group.controls, t('сбросить весь раздел'))),
       h('p', { class: 'lead', text: group.about }),
       chips);
     const subs = names.map((name) => {
@@ -135,17 +136,17 @@ export function createPanel({ root, store, areas, groups, tools, onHover, onView
     const changed = all.filter(isChanged);
     listedChanges = changed.map((c) => c.id).join();
     const head = h('header', { class: 'page-head' },
-      h('p', { class: 'crumbs', text: 'Проект / Изменения' }),
-      h('div', { class: 'title-row' }, h('h1', { text: 'Изменения' }),
-        changed.length ? button('link', 'сбросить всё', () => {
-          if (window.confirm('Вернуть весь худ к обычному виду Dota? Это можно будет отменить кнопкой «Отменить».')) resetControls(all);
+      h('p', { class: 'crumbs', text: t('Проект / Изменения') }),
+      h('div', { class: 'title-row' }, h('h1', { text: t('Изменения') }),
+        changed.length ? button('link', t('сбросить всё'), () => {
+          if (window.confirm(t('Вернуть весь худ к обычному виду Dota? Это можно будет отменить кнопкой «Отменить».'))) resetControls(all);
         }) : null),
       h('p', { class: 'lead', text: changed.length
-        ? `В мод попадёт только то, что перечислено здесь: ${settingsWord(changed.length)}. Всё остальное останется как в обычной Dota.`
-        : 'Пока всё как в обычной Dota. Выбери раздел слева или нажми на часть худа в превью.' }));
+        ? t('В мод попадёт только то, что перечислено здесь: {count}. Всё остальное останется как в обычной Dota.', { count: settingsWord(changed.length) })
+        : t('Пока всё как в обычной Dota. Выбери раздел слева или нажми на часть худа в превью.') }));
     const parts = groups.filter((g) => g.controls.some(isChanged)).map((group) => {
       const controls = group.controls.filter(isChanged);
-      const open = button('link', 'открыть раздел', () => show({ kind: 'group', id: group.id }));
+      const open = button('link', t('открыть раздел'), () => show({ kind: 'group', id: group.id }));
       const node = section(`changes/${group.id}`, group.title, controls, controls.map((c) => row(c, c.sub)));
       node.querySelector('.sub-head').append(open);
       return node;
@@ -160,12 +161,12 @@ export function createPanel({ root, store, areas, groups, tools, onHover, onView
       return words.every((w) => text.includes(w));
     });
     const head = h('header', { class: 'page-head' },
-      h('p', { class: 'crumbs', text: 'Поиск' }),
-      h('div', { class: 'title-row' }, h('h1', { text: found.length ? `Нашлось: ${found.length}` : 'Ничего не нашлось' })),
-      h('p', { class: 'lead', text: found.length ? `По запросу «${query}». Настройки можно менять прямо здесь.` : 'Попробуй другое слово, например «цвет», «обводка» или «картинка».' }));
+      h('p', { class: 'crumbs', text: t('Поиск') }),
+      h('div', { class: 'title-row' }, h('h1', { text: found.length ? t('Нашлось: {n}', { n: found.length }) : t('Ничего не нашлось') })),
+      h('p', { class: 'lead', text: found.length ? t('По запросу «{query}». Настройки можно менять прямо здесь.', { query }) : t('Попробуй другое слово, например «цвет», «обводка» или «картинка».') }));
     const parts = groups.filter((g) => found.some((c) => groupOf[c.id] === g)).map((group) => {
       const controls = found.filter((c) => groupOf[c.id] === group);
-      const open = button('link', 'открыть раздел', () => show({ kind: 'group', id: group.id }));
+      const open = button('link', t('открыть раздел'), () => show({ kind: 'group', id: group.id }));
       const node = section(`search/${group.id}`, group.title, null, controls.map((c) => row(c, c.sub)));
       node.querySelector('.sub-head').append(open);
       return node;

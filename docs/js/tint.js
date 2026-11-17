@@ -1,4 +1,5 @@
 // Перекраска картинок на месте: пиксели считаются здесь, в игру уходит готовый PNG.
+import { t } from './i18n.js';
 
 const SHADE_POINT = 0.8;   // до этой яркости оттенок темнеет, выше уходит в блик
 const HIGHLIGHT_LIMIT = 0.6;
@@ -119,7 +120,7 @@ function untinted(value) {
 /** controls — настройки-картинки каталога; images — хранилище картинок браузера. */
 export function createTinter({ store, controls, images, toast }) {
   const attempts = new Map();
-  const failed = 'Эту картинку не получилось перекрасить. Попробуй другую.';
+  const failed = t('Эту картинку не получилось перекрасить. Попробуй другую.');
 
   async function tintOne(control, value, tint, change) {
     const attempt = (attempts.get(control.id) || 0) + 1;
@@ -139,7 +140,7 @@ export function createTinter({ store, controls, images, toast }) {
     let done = 0;
     let skipped = 0;
     for (const control of targets) {
-      toast(`Перекрашиваю картинки: ${done + skipped + 1} из ${targets.length}`);
+      toast(t('Перекрашиваю картинки: {n} из {total}', { n: done + skipped + 1, total: targets.length }));
       try {
         next[control.id] = await tintedValue(control, current[control.id], tint, images);
         done += 1;
@@ -148,7 +149,7 @@ export function createTinter({ store, controls, images, toast }) {
       }
     }
     store.replace(next);
-    toast(skipped ? `Готово: ${done}. Не получилось: ${skipped}.` : `Готово, перекрашено картинок: ${done}.`);
+    toast(skipped ? t('Готово: {done}. Не получилось: {skipped}.', { done, skipped }) : t('Готово, перекрашено картинок: {done}.', { done }));
   }
 
   function untintAll() {

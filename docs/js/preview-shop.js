@@ -1,5 +1,6 @@
 // Окно магазина в превью. Устроено как #Main в layout/hud/dota_hud_shop.xml:
 // сверху поиск и сетка предметов, снизу закреплённые предметы и сборка.
+import { t } from './i18n.js';
 const varName = (id) => id.replace(/\./g, '-');
 
 // Полный адрес: картинка подставляется через переменную CSS, а там путь считался бы от папки стилей.
@@ -13,11 +14,11 @@ export const img = (id) => {
 export const iconImg = (src, cls = '') => `<img class="${cls}" src="${game(src)}" alt="" draggable="false">`;
 
 const itemSrc = (name) => `panorama/images/items/${name}_png.png`;
-const NEUTRAL_TIERS = [['1-й разряд', '0:00+'], ['2-й разряд', '15:00+'], ['3-й разряд', '25:00+'], ['4-й разряд', '35:00+'], ['5-й разряд', '60:00+']];
+const NEUTRAL_TIERS = [[t('1-й разряд'), '0:00+'], [t('2-й разряд'), '15:00+'], [t('3-й разряд'), '25:00+'], [t('4-й разряд'), '35:00+'], [t('5-й разряд'), '60:00+']];
 const MADSTONE_TEXT = [
-  'Убейте всех нейтральных крипов в одном лагере, чтобы получить 2 безумруда для себя и 1 для случайного союзника (за лагеря древних крипов даётся 3 безумруда себе и 2 — случайным союзникам).',
-  'Зарабатывайте безумруды, чтобы создавать нейтральные предметы:<br>— На предмет 1-го разряда нужно 6 безумрудов.<br>— На предметы остальных разрядов нужно по 10 безумрудов.',
-  'Достигнув лимита текущего разряда, продолжайте зарабатывать безумруды для союзников.',
+  t('Убейте всех нейтральных крипов в одном лагере, чтобы получить 2 безумруда для себя и 1 для случайного союзника (за лагеря древних крипов даётся 3 безумруда себе и 2 — случайным союзникам).'),
+  t('Зарабатывайте безумруды, чтобы создавать нейтральные предметы:<br>— На предмет 1-го разряда нужно 6 безумрудов.<br>— На предметы остальных разрядов нужно по 10 безумрудов.'),
+  t('Достигнув лимита текущего разряда, продолжайте зарабатывать безумруды для союзников.'),
 ];
 
 /** Предмет магазина (DOTAShopItem): иконка, золотая рамка «можно купить» и число в углу. */
@@ -45,11 +46,11 @@ function neutralTab(ui, hero) {
   const dots = NEUTRAL_TIERS.map((_, i) => `<i class="dot t${i + 1}"></i>`).join('');
   return `
     <div class="shop-tab-body neutrals">
-      <b class="neutral-title">Прогресс команды</b>
+      <b class="neutral-title">${t('Прогресс команды')}</b>
       <div class="neutral-tiers">${tiers}</div>
       <div class="neutral-line"><img src="${game(hero)}" alt="" draggable="false"><span>${dots}</span></div>
-      <span class="neutral-all">Все нейтральные предметы</span>
-      <div class="madstone-head"><img src="${game(ui.madstone)}" alt="" draggable="false"><b>Безумруды</b><i></i>
+      <span class="neutral-all">${t('Все нейтральные предметы')}</span>
+      <div class="madstone-head"><img src="${game(ui.madstone)}" alt="" draggable="false"><b>${t('Безумруды')}</b><i></i>
         <span class="help" style="-webkit-mask-image:url('${game(ui.help)}');mask-image:url('${game(ui.help)}')"></span></div>
       ${MADSTONE_TEXT.map((text) => `<p class="madstone-text">${text}</p>`).join('')}
     </div>`;
@@ -63,9 +64,9 @@ function guide(shop, ui, border) {
     </div>`).join('');
   return `
     <div class="guide" data-c="shop.guideBg">${img('shop.guideBg')}
-      <span class="guide-browse">Все сборки</span>
+      <span class="guide-browse">${t('Все сборки')}</span>
       <i class="guide-toggle" style="background-image:url('${game(ui.guideToggle)}'),url('${game(ui.itemBuildBg)}')"></i>
-      <div class="guide-head"><b class="guide-title" data-c="shop.guideTitle">Стандартные предметы</b>
+      <div class="guide-head"><b class="guide-title" data-c="shop.guideTitle">${t('Стандартные предметы')}</b>
         <i class="guide-pencil" style="background-image:url('${game(ui.pencil)}')"></i></div>
       ${categories}
     </div>`;
@@ -89,7 +90,7 @@ export function shopPanel(assets) {
         <div class="shop-search" data-c="shop.searchRow">
           <div class="shop-box" data-c="shop.searchBox">
             <i class="shop-search-icon" style="background-image:url('${game(ui.shopSearch)}')"></i>
-            <span data-c="shop.placeholder">Поиск</span>
+            <span data-c="shop.placeholder">${t('Поиск')}</span>
           </div>
           ${iconBox(ui.shopSuggest, 'plain')}${iconBox(ui.shopStar, 'plain')}${iconBox(ui.shopColumns)}${iconBox(ui.shopTeamItems)}
           <i class="shop-buyback" style="background-image:url('${game(ui.buybackProtect)}')"></i>
@@ -97,27 +98,27 @@ export function shopPanel(assets) {
         <div class="shop-area" data-c="shop.color">
           <i class="shop-fill"></i>${img('shop.bg')}
           <div class="shop-tabs">
-            <span class="shop-tab t-basics" data-c="shop.tab">Основные</span>
-            <span class="shop-tab t-upgrades" data-c="shop.tab">Улучшения</span>
-            <span class="shop-tab t-neutrals" data-c="shop.tab">Нейтральные</span>
+            <span class="shop-tab t-basics" data-c="shop.tab">${t('Основные')}</span>
+            <span class="shop-tab t-upgrades" data-c="shop.tab">${t('Улучшения')}</span>
+            <span class="shop-tab t-neutrals" data-c="shop.tab">${t('Нейтральные')}</span>
           </div>
           <div class="shop-content">
             ${itemsTab('basics', shop.basics || [], border)}
             ${itemsTab('upgrades', shop.upgrades || [], border)}
             ${neutralTab(ui, assets.icons[0])}
-            <span class="shop-hint"><i style="-webkit-mask-image:url('${game(ui.help)}');mask-image:url('${game(ui.help)}')"></i>Ctrl + ПКМ по предмету — больше опций</span>
+            <span class="shop-hint"><i style="-webkit-mask-image:url('${game(ui.help)}');mask-image:url('${game(ui.help)}')"></i>${t('Ctrl + ПКМ по предмету — больше опций')}</span>
           </div>
-          <div class="team-items"><b>Командные предметы</b>
-            <span><i style="-webkit-mask-image:url('${game(ui.help)}');mask-image:url('${game(ui.help)}')"></i>Подробнее</span></div>
+          <div class="team-items"><b>${t('Командные предметы')}</b>
+            <span><i style="-webkit-mask-image:url('${game(ui.help)}');mask-image:url('${game(ui.help)}')"></i>${t('Подробнее')}</span></div>
         </div>
         <div class="shop-pinned" data-c="shop.pinned">${img('shop.pinnedImg')}
-          <b>Закреплённые предметы</b><div class="pinned-row">${pinned}<i class="pinned-empty"></i></div>
+          <b>${t('Закреплённые предметы')}</b><div class="pinned-row">${pinned}<i class="pinned-empty"></i></div>
         </div>
         <div class="shop-combines" data-c="shop.combines">${img('shop.combinesImg')}</div>
       </div>
     </div>
     <div class="stash">
-      <span class="stash-grab">Взять всё</span><b class="stash-title">Тайник</b>
+      <span class="stash-grab">${t('Взять всё')}</span><b class="stash-title">${t('Тайник')}</b>
       <div class="stash-slots">${'<i></i>'.repeat(6)}</div>
     </div>`;
 }

@@ -14,9 +14,11 @@ import { loadPrefs, loadProject, savePrefs, saveProject } from './storage.js';
 import { createStore } from './store.js';
 import { createTinter } from './tint.js';
 import { createVersions } from './versions.js';
+import { setupPage, t, translateCatalog } from './i18n.js';
 
 const $ = (id) => document.getElementById(id);
-const DEFAULT_NAME = 'Мой худ';
+const DEFAULT_NAME = t('Мой худ');
+const DEFAULT_NAMES = ['Мой худ', 'My HUD']; // i18n-ok: имя по умолчанию на обоих языках
 const SAVE_DELAY_MS = 300;
 const PANEL_MIN = 380;
 const PANEL_MAX = 820;
@@ -112,9 +114,9 @@ async function start() {
   wireTheme(prefs);
   let data;
   try {
-    data = await loadCatalog();
+    data = translateCatalog(await loadCatalog());
   } catch {
-    $('panel').textContent = 'Не удалось загрузить настройки. Обнови страницу.';
+    $('panel').textContent = t('Не удалось загрузить настройки. Обнови страницу.');
     return;
   }
   const { groups, areas } = data;
@@ -135,7 +137,8 @@ async function start() {
 
   const saved = loadProject();
   const store = createStore(cleanValues(saved?.values), defaults);
-  let projectName = typeof saved?.name === 'string' && saved.name ? saved.name : DEFAULT_NAME;
+  // Имя по умолчанию показываем на языке сайта, своё имя человека не трогаем.
+  let projectName = typeof saved?.name === 'string' && saved.name && !DEFAULT_NAMES.includes(saved.name) ? saved.name : DEFAULT_NAME;
   $('projectName').value = projectName;
 
   const stage = $('stage');
@@ -182,10 +185,10 @@ async function start() {
   async function upload(file) {
     try {
       const id = await images.add(await fileToPng(file));
-      if (!images.durable()) toast('Картинка добавлена, но этот браузер не даёт её сохранить: после закрытия вкладки она пропадёт. Сохрани проект в файл.');
+      if (!images.durable()) toast(t('Картинка добавлена, но этот браузер не даёт её сохранить: после закрытия вкладки она пропадёт. Сохрани проект в файл.'));
       return id;
     } catch {
-      toast('Эту картинку не получилось открыть. Подойдут PNG, JPG и WebP.');
+      toast(t('Эту картинку не получилось открыть. Подойдут PNG, JPG и WebP.'));
       return null;
     }
   }
@@ -263,10 +266,10 @@ async function start() {
   function save() {
     const ok = saveProject({ name: projectName, values: store.get() });
     saveState.dataset.state = ok ? 'saved' : 'failed';
-    saveState.textContent = ok ? 'Сохранено в этом браузере' : 'Не сохраняется: хранилище браузера выключено';
+    saveState.textContent = ok ? t('Сохранено в этом браузере') : t('Не сохраняется: хранилище браузера выключено');
     saveState.title = ok
-      ? 'Работа сохраняется сама после каждой правки. Чтобы перенести худ на другой компьютер, сохрани проект в файл.'
-      : 'Сохрани проект в файл через меню «Файл», иначе после закрытия вкладки он пропадёт.';
+      ? t('Работа сохраняется сама после каждой правки. Чтобы перенести худ на другой компьютер, сохрани проект в файл.')
+      : t('Сохрани проект в файл через меню «Файл», иначе после закрытия вкладки он пропадёт.');
   }
   const saveLater = debounce(save, SAVE_DELAY_MS);
 
@@ -283,7 +286,7 @@ async function start() {
     panel.refresh({ pressing: pressing || isColorPopOpen() });
     paintCounts();
     saveState.dataset.state = 'saving';
-    saveState.textContent = 'Сохраняю…';
+    saveState.textContent = t('Сохраняю…');
     saveLater();
   });
 
@@ -323,14 +326,14 @@ async function start() {
       const project = await readProject(file, all, images);
       store.replace(project.values);
       if (project.name) { projectName = project.name; $('projectName').value = projectName; }
-      toast('Проект открыт. Прошлый худ можно вернуть кнопкой «Отменить».');
+      toast(t('Проект открыт. Прошлый худ можно вернуть кнопкой «Отменить».'));
     } catch {
-      toast('Этот файл не подходит. Нужен файл, сохранённый в HUD Studio.');
+      toast(t('Этот файл не подходит. Нужен файл, сохранённый в HUD Studio.'));
     }
   });
   $('resetAll').addEventListener('click', () => {
     closeFileMenu();
-    if (window.confirm('Вернуть весь худ к обычному виду Dota? Это можно будет отменить кнопкой «Отменить».')) store.replace({ ...defaults });
+    if (window.confirm(t('Вернуть весь худ к обычному виду Dota? Это можно будет отменить кнопкой «Отменить».'))) store.replace({ ...defaults });
   });
 
   const exporter = createExporter({
@@ -385,5 +388,6 @@ async function start() {
   document.body.classList.add('ready');
 }
 
+setupPage();
 startMotion();
 start();

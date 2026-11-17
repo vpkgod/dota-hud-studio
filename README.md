@@ -6,7 +6,7 @@
 
 **Build your own Dota 2 HUD in the browser: live preview, no install, a ready-to-use mod in one click.**
 
-[**Open the editor →**](https://vpkgod.github.io/dota-hud-studio/)
+[**Open the editor →**](https://vpkgod.github.io/dota-hud-studio/?lang=en)
 
 [![Live site](https://img.shields.io/badge/site-online-3d5afe?style=flat-square)](https://vpkgod.github.io/dota-hud-studio/)
 [![No install](https://img.shields.io/badge/runs%20in-browser-555?style=flat-square)](https://vpkgod.github.io/dota-hud-studio/)
@@ -24,7 +24,7 @@ HUD Studio is a free web editor for the **Dota 2 HUD** (the in-game interface). 
 
 When you are done, the site builds a real Dota 2 mod file (`pakNN_dir.vpk`) **inside your browser**. There is no server, no account and nothing to install.
 
-> The interface of the site is currently in Russian. Everything is visual, so it is easy to follow anyway.
+The editor is available in **English and Russian** — switch with the RU / EN buttons in the top bar.
 
 ## Features
 
@@ -34,17 +34,19 @@ When you are done, the site builds a real Dota 2 mod file (`pakNN_dir.vpk`) **in
 - **Your own images** — upload pictures for frames, backgrounds and buttons.
 - **Undo / redo, versions and project files** — snapshots of your HUD, export/import a project to move it to another computer.
 - **Private by design** — your project is stored only in your browser (localStorage + IndexedDB).
-- **Light and dark theme** for the editor itself.
+- **English and Russian interface**, light and dark theme.
 
 ## How to use
 
-1. Open **[vpkgod.github.io/dota-hud-studio](https://vpkgod.github.io/dota-hud-studio/)**.
+1. Open **[vpkgod.github.io/dota-hud-studio](https://vpkgod.github.io/dota-hud-studio/?lang=en)**.
 2. Pick a HUD section on the left (or click a part of the HUD in the preview).
 3. Change settings in the middle panel. Changed values are highlighted, and each has a reset button.
-4. Press **Download HUD** («Скачать худ»), choose your game language and a file number (default `80`).
+4. Press **Download HUD**, choose your game language and a file number (default `80`).
 5. In Steam: right-click Dota 2 → **Manage → Browse local files**.
 6. Put the downloaded `pak80_dir.vpk` into `game/dota_<language>` (for example `game/dota_english`). Create the folder if it does not exist. Do not rename the file.
 7. Restart Dota 2.
+
+If the HUD doesn't show up, the game is probably not loading its language folder. Add the launch option `-language <language>` (for example `-language english`) in Steam → Dota 2 → Properties → Launch options and restart. This is how the mod is tested with `-language russian`.
 
 To remove the mod, delete the file and restart the game.
 
@@ -77,6 +79,7 @@ python3 -m unittest discover -s tests -t .    # settings catalog tests
 
 - `python3 -m hudstudio.export` regenerates `docs/data`, `docs/game` and `docs/gamecss` from the installed game. Do not edit these folders by hand.
 - `update.sh` needs an installed Dota 2 and `Source2Viewer-CLI`. Paths can be changed with `HUDSTUDIO_DOTA` and `HUDSTUDIO_DECOMPILER` (see `hudstudio/config.py`).
+- Site translations live in `docs/js/lang/en.js` (key = the Russian text). `tests/js/i18n.test.mjs` fails if any text is missing a translation.
 - A new setting = an entry in `hudstudio/cat_*.py` + a `--setting-id` variable in `docs/styles/preview.css`. CSS rules are generated in two places (`hudstudio/cssgen.py` and `docs/js/build/cssgen.js`), kept in sync by `tests/js/parity.test.mjs`.
 
 Issues and pull requests are welcome.

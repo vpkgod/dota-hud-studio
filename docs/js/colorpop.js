@@ -1,4 +1,5 @@
 // Окошко выбора цвета: готовые цвета, любой цвет и прозрачность простым ползунком.
+import { t } from './i18n.js';
 const PALETTE = ['#ffffff', '#c9ced8', '#6c7486', '#000000', '#ff4d4d', '#c8102e', '#ff8a3c', '#ffcc33',
   '#7ddc3a', '#2f9e44', '#1fd6a6', '#22c7f0', '#4165ce', '#7a5cff', '#c04dff', '#ff4fb5'];
 
@@ -23,13 +24,13 @@ function build() {
   node.className = 'color-pop';
   node.hidden = true;
   node.setAttribute('role', 'dialog');
-  node.setAttribute('aria-label', 'Выбор цвета');
+  node.setAttribute('aria-label', t('Выбор цвета'));
   node.innerHTML = `
     <div class="pop-palette"></div>
-    <label class="pop-line">Любой цвет <input class="native" type="color"></label>
-    <label class="pop-line">Прозрачность <input class="alpha" type="range" min="0" max="255"></label>
-    <label class="pop-line">Код цвета <input class="hex" spellcheck="false"></label>
-    <button type="button" class="pop-done">Готово</button>`;
+    <label class="pop-line">${t('Любой цвет')} <input class="native" type="color"></label>
+    <label class="pop-line">${t('Прозрачность')} <input class="alpha" type="range" min="0" max="255"></label>
+    <label class="pop-line">${t('Код цвета')} <input class="hex" spellcheck="false"></label>
+    <button type="button" class="pop-done">${t('Готово')}</button>`;
   node.querySelector('.pop-palette').append(...PALETTE.map((color) => {
     const button = document.createElement('button');
     button.type = 'button';
