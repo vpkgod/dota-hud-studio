@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://vpkgod.github.io/dota-hud-studio/sitemap.xml
