@@ -117,7 +117,8 @@
 .flare-r { right: 1px; width: 92px; height: 138px; }
 .center-bg { left: 210px; right: 254px; height: 145px; }
 .center-bg .tint { position: absolute; inset: 0; background: var(--ab-bgColor); }
-.inset-shadow { width: 10px; height: 145px; background-size: 100% 100%; z-index: 2; pointer-events: none; }
+/* В игре z-index 800: тень лежит поверх способностей и полосок (видна, если их сдвинуть) */
+.inset-shadow { width: 10px; height: 145px; z-index: 6; pointer-events: none; }
 .inset-shadow.left { left: 210px; }
 .inset-shadow.right { right: 295px; transform: scaleX(-1); }
 .por { left: 52px; width: 159px; height: 145px; overflow: hidden; display: var(--por-show); opacity: var(--por-opacity); transform: var(--por-offset) scale(var(--por-scale)); transform-origin: bottom center; }
@@ -142,6 +143,12 @@
   -webkit-mask-image: linear-gradient(#000 45%, #0009); mask-image: linear-gradient(#000 45%, #0009); }
 .xp-ring { position: absolute; inset: 3px; border-radius: 50%; border: 1.5px solid var(--por-xp); z-index: 1; -webkit-mask-image: conic-gradient(#000 64%, #0000 0); mask-image: conic-gradient(#000 64%, #0000 0); }
 .xp-glow { position: absolute; inset: 3px; border-radius: 50%; border: 2px solid #da6f00; filter: blur(4px); opacity: .8; -webkit-mask-image: conic-gradient(#000 64%, #0000 0); mask-image: conic-gradient(#000 64%, #0000 0); }
+/* Имя и значок тира в игре — отдельные панели: сдвигаются и сжимаются вместе с портретом,
+   вокруг той же точки (низ, середина портрета: 52 + 159 / 2 = 131.5 от края панели) */
+.unit-name, .por-badge { transform: var(--por-offset) scale(var(--por-scale)); }
+.unit-name { transform-origin: 79.5px calc(100% + 145px); }
+.por-badge { transform-origin: 102.5px calc(100% + 105px); }
+.por-badge { left: 29px; bottom: 105px; width: 182px; height: 61px; background-size: 100% 100%; z-index: 3; pointer-events: none; }
 .unit-name { left: 52px; width: 159px; bottom: 145px; text-align: center; font-size: var(--unit-nameSize); line-height: 18px; color: var(--unit-name); text-shadow: var(--unit-nameOutline); text-transform: uppercase; letter-spacing: 2px; font-weight: 700; z-index: 3; }
 
 .bars { left: 223px; right: 306px; bottom: 8px; display: var(--bars-show); opacity: var(--bars-opacity); transform: var(--bars-offset) scale(var(--bars-scale)); transform-origin: bottom center; z-index: 3; }
@@ -181,7 +188,9 @@
 .hot { position: absolute; left: -1px; top: -1px; min-width: 13px; padding: 0 2px; background: var(--ab-hotkeyBg); color: var(--ab-hotkey); font-size: 11px; line-height: 13px; font-weight: 500; text-align: center; border: 1px solid #000; border-radius: 2px; z-index: 2; }
 .hot.small { font-size: 10px; line-height: 12px; min-width: 12px; padding: 0 2px; left: -1px; top: -2px; }
 .talent { position: relative; flex: none; width: 74px; height: 74px; margin: 0 -2px 19px 0; display: var(--talent-show); opacity: var(--talent-opacity); transform: var(--talent-offset) scale(var(--talent-scale)); }
-.talent-pips-arc { position: absolute; inset: 0; background-size: cover; }
+.talent-pips-arc { position: absolute; inset: 0; }
+/* Взятые метки атрибутов: цвет под маской attributes_pips_mask_7 (белые черточки на чёрном) */
+.talent-pips-fill { position: absolute; inset: 0; background: var(--talent-pips); mask: var(--mask) center / cover no-repeat luminance; }
 .talent-layer { position: absolute; left: 6px; top: 6px; width: 62px; height: 62px; }
 .talent-layer.flip { transform: scaleX(-1); }
 .talent-tree { filter: brightness(1.3); }
@@ -199,7 +208,9 @@
 
 .inv { right: 93px; width: 202px; height: 145px; display: var(--inv-show); opacity: var(--inv-opacity); transform: var(--inv-offset) scale(var(--inv-scale)); transform-origin: bottom right; }
 .inv-items, .inv-over { position: absolute; left: 0; right: 0; top: 0; }
-.inv-items { bottom: 0; }
+.inv-items { bottom: 0; background: var(--inv-bgColor); }
+/* «Вид → Без предметов»: пустые ячейки, как у героя без инвентаря */
+.no-items .inv .item, .no-items .rounds .round-item, .no-items .charges, .no-items .itemcd { display: none; }
 .inv-over { height: 105px; border-bottom: 1px solid #000e; }
 .inv-grid { position: absolute; left: 3px; top: 6px; right: 0; display: flex; flex-wrap: wrap; z-index: 1; }
 .slot { position: relative; width: var(--inv-slotW); height: var(--inv-slotH); margin: 2px 3px; background: var(--inv-slotColor); border-radius: var(--inv-radius); }
@@ -208,7 +219,9 @@
 .charges { position: absolute; right: 3px; bottom: 0; font-size: var(--inv-chargesSize); color: var(--inv-charges); text-shadow: var(--inv-chargesOutline); }
 .itemcd { position: absolute; inset: 0; display: grid; place-items: center; background: #0008; font-size: var(--inv-cdSize); color: var(--inv-cd); text-shadow: var(--inv-cdOutline); }
 .backpack { position: absolute; left: 6px; top: 105px; display: flex; gap: 6px; z-index: 1; }
-.pack { width: 60px; height: 32px; background: #0006 center / 100% 100% no-repeat; }
+.pack { position: relative; width: 60px; height: 32px; }
+.pack-shade { position: absolute; inset: 0; display: var(--inv-packShadow); box-shadow: inset #000a 0 2px 16px; pointer-events: none; }
+.pack .item { position: relative; }
 .pack .item { filter: saturate(.25) brightness(.7); }
 /* Справа от инвентаря: счётчик камней, нейтральный предмет и телепорт (hud_reborn.css) */
 .rounds { right: 43px; width: 48px; height: 160px; z-index: 3; display: var(--round-show); opacity: var(--round-opacity); transform: var(--round-offset) scale(var(--round-scale)); transform-origin: bottom center; }

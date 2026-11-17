@@ -21,12 +21,15 @@ def latest_styles():
 class RealCssTest(unittest.TestCase):
     def test_selector_tokens_exist_in_target_file(self):
         styles, missing = latest_styles(), []
+        # Класс без своих стилей тоже годится, если панель с ним есть в layout игры (.LeftRightFlow).
+        xml = "".join(p.read_text("utf8", "replace") for p in (styles.parent / "layout").rglob("*.xml"))
+        layout_classes = {f".{c}" for attr in re.findall(r'\bclass="([^"]+)"', xml) for c in attr.split()}
         for cid, control in catalog.controls().items():
             for target in control["emit"]:
                 text = (styles / target["file"]).read_text("utf8")
                 for selector in target["sel"]:
                     for token in re.findall(r"[#.][A-Za-z_][\w-]*", selector):
-                        if token not in text:
+                        if token not in text and token not in layout_classes:
                             missing.append((cid, target["file"], token))
         self.assertEqual(missing, [])
 

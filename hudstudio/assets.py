@@ -29,7 +29,7 @@ PREVIEW_EXTRAS = [
     "panorama/images/primary_attribute_icons/mini_primary_attribute_icon_",
     "panorama/images/hud/attributes_pips", "panorama/images/hud/buyback_protection",
     "panorama/images/hud/tormentor_timer_icon", "panorama/images/hud/icon_roshan_psd", "panorama/images/hud_radar_png",
-    "panorama/images/hud/pip_",
+    "panorama/images/hud/pip_", "panorama/images/hud/portrait_hero_badge_frame_tier_",
     "panorama/images/control_icons/brackets_png",
     # Магазин: все иконки предметов и раскладка лавки по разделам.
     "panorama/images/items/", "scripts/shops.txt",
@@ -45,7 +45,8 @@ _ICONS = "panorama/images/control_icons/24px/"
 _ATTR = "panorama/images/primary_attribute_icons/mini_primary_attribute_icon_"
 # Картинки игры, из которых превью собирает части худа, не имеющие своих настроек.
 PREVIEW_UI = {
-    "attrPips": _HUD + "attributes_pips_background_7_png.png",
+    "attrPipsMask": _HUD + "attributes_pips_mask_7_png.png",
+    "heroBadge": _HUD + "portrait_hero_badge_frame_tier_3_psd.png",
     "pipOn": _HUD + "pip_on_png.png", "pipOff": _HUD + "pip_off_png.png",
     "iconDamage": _REBORN + "icon_damage_psd.png", "iconAttackSpeed": _REBORN + "icon_attack_speed_psd.png",
     "iconArmor": _REBORN + "icon_armor_psd.png", "iconMagicResist": _REBORN + "icon_magic_resist_psd.png",
@@ -81,7 +82,7 @@ PREVIEW_UI = {
     "madstone": _HUD + "neutral_currency_icon_png.png",
 }
 # Меняется, когда программе нужны новые файлы игры: кэш тогда распаковывается заново.
-CACHE_VERSION = "8"
+CACHE_VERSION = "9"
 # Разделы магазина из scripts/shops.txt — так, как они стоят на вкладках «Основные» и «Улучшения».
 SHOP_SECTIONS = {
     "basics": [["consumables", "Расходники"], ["attributes", "Атрибуты"], ["weapons_armor", "Снаряжение"],

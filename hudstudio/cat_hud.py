@@ -3,7 +3,8 @@
 Селекторы скопированы из оригинального CSS Dota 2; значения по умолчанию равны игре.
 """
 
-from .cat_helpers import (ABILITY, AGHS, FACETS_IMG, HEALTH, INNATE, INVENTORY, REBORN, REBORN_IMG, STATS, UNITNAME,
+from .cat_helpers import (ABILITY, AGHS, FACETS_IMG, HEALTH, HUD_IMG, INNATE, INVENTORY, REBORN, REBORN_IMG,
+                          STATBRANCH, STATS, TALENT_HINT, UNITNAME,
                           XP, block, color, emit, fill, glow, grad, image, num, outline, sub, text, texture, toggle)
 
 
@@ -96,7 +97,10 @@ def abilities():
              text("ab.mana", mana_cost, "#57b7ff", 14, hi=28),
              color("ab.hotkeyBg", "Фон клавиши", "#212726", emit(ABILITY, ".Reborn #Hotkey"), "background-color"),
              color("ab.hotkey", "Цвет буквы клавиши", "#ffffff", emit(ABILITY, ".Reborn #HotkeyText"))),
-        *sub("Положение", block("ab", "#AbilitiesAndStatBranch")),
+        *sub("Тень по краям фона",
+             image("ab.inset", "Тень у краёв", [emit(REBORN, ".AbilityInsetShadowLeft", ".AbilityInsetShadowRight")],
+                   REBORN_IMG + "ability_inset_shadow_psd.png")),
+        *sub("Положение", block("ab", "#AbilitiesAndStatBranch", carry=TALENT_HINT)),
     ]
 
 
@@ -111,9 +115,15 @@ def talents():
         *sub("Положение врождённой", block("innate", ".RootInnateDisplay", file=INNATE)),
         *sub("Дерево талантов",
              texture("talent.bg", "Круг под деревом", [REBORN_IMG + "statbranch_button_bg_psd"]),
-             texture("talent.tree", "Дерево без выбранных талантов", [REBORN_IMG + "statbranch_button_bg_all_off_psd"],
-                     "Выбранные таланты загораются поверх: их метки лежат в разделе «Ветка талантов».")),
-        *sub("Положение талантов", block("talent", "#StatBranch")),
+             texture("talent.tree", "Ствол и пустые листья дерева", [REBORN_IMG + "statbranch_button_bg_all_off_psd"],
+                     "Серое дерево целиком, вместе со стволом. Выбранные таланты загораются поверх: "
+                     "их листья — в разделе «Ветка талантов» (10, 15, 20, 25 уровень).")),
+        *sub("Метки атрибутов под деревом",
+             color("talent.pips", "Цвет взятых меток", "#E3CE8F",
+                   emit(STATBRANCH, "#AttributePipsContainer #AttributePips"), "background-color"),
+             image("talent.pipsBg", "Пустые метки", [emit(STATBRANCH, "#AttributePipsContainer")],
+                   HUD_IMG + "attributes_pips_background_7_png.png")),
+        *sub("Положение талантов", block("talent", "#StatBranch", carry=TALENT_HINT)),
         *sub("Аганим и осколок",
              image("aghs.scepter", "Скипетр, нет", [emit(AGHS, "#AghsStatusScepter")],
                    REBORN_IMG + "aghsstatus_scepter_psd.png", "contain"),
@@ -134,10 +144,21 @@ def inventory():
         *sub("Фон",
              image("inv.bg", "Задний фон инвентаря", [emit(INVENTORY, ".Reborn #inventory_items")],
                    REBORN_IMG + "inventory_bg_bg_psd.png"),
+             color("inv.bgColor", "Цвет под фоном", "#221111", emit(INVENTORY, ".Reborn #inventory_items"),
+                   "background-color"),
              image("inv.image", "Картинка инвентаря", [emit(INVENTORY, ".Reborn #InventoryBG")],
                    REBORN_IMG + "inventory_bg_psd.png")),
         *sub("Слоты",
-             image("inv.well", "Картинка пустого слота", [slot], REBORN_IMG + "inventory_item_well_psd.png"),
+             # Пассивки и предметы с повторным применением игра рисует своим правилом.
+             image("inv.well", "Картинка пустого слота",
+                   [slot, emit(ABILITY, ".Reborn .InventoryItem.can_cast_again #ButtonSize",
+                               ".Reborn .InventoryItem.is_passive #ButtonSize")],
+                   REBORN_IMG + "inventory_item_well_psd.png"),
+             image("inv.packSlot", "Ячейка рюкзака",
+                   [emit(ABILITY, ".Reborn #center_block .InventoryItem.BackpackSlot #ButtonSize")],
+                   REBORN_IMG + "bg_backpack_psd.png"),
+             toggle("inv.packShadow", "Тень в ячейках рюкзака",
+                    emit(ABILITY, ".Reborn #center_block .InventoryItem.BackpackSlot #ButtonSize"), off="box-shadow: none"),
              color("inv.slotColor", "Цвет слота", "#1a1c1d88", slot, "background-color"),
              num("inv.slotW", "Ширина", 60, 30, 110, [{**slot, "prop": "width"}]),
              num("inv.slotH", "Высота", 45, 24, 90, [{**slot, "prop": "height"}]),
@@ -152,9 +173,20 @@ def inventory():
              image("inv.neutral", "Фон нейтрального", [emit(REBORN, "#inventory_neutral_slot")],
                    REBORN_IMG + "bg_neutral_slot_png.png"),
              color("inv.roundBorder", "Цвет рамки", "#55595d", round_slots, "border-color")),
-        *sub("Положение круглых слотов", block("round", "#inventory_composition_layer_container")),
-        *sub("Положение инвентаря", block("inv", "#inventory")),
+        *sub("Положение круглых слотов", block("round", "#inventory_composition_layer_container",
+                                                        anchor={"side": "right", "margin": 18, "width": 100, "origin": 0.5,
+                                                                "margins": True})),
+        *sub("Положение инвентаря", block("inv", "#inventory",
+                                                anchor={"side": "right", "margin": 93, "width": 202, "origin": 1})),
     ]
+
+
+# Имя героя и значок тира (Dota Plus) в игре — отдельные панели над портретом: едут за ним.
+PORTRAIT_FOLLOWERS = (
+    emit(REBORN, "#unitname", own={"margin": 52, "width": 159, "bottom": 145}),
+    emit(REBORN, "#PortraitHeroBadgeOverlay", own={"margin": 29, "width": 182, "bottom": 105}),
+    emit(REBORN, "#PortraitHeroBadge", own={"margin": 25, "width": 50, "bottom": 128}),
+)
 
 
 def portrait():
@@ -174,5 +206,7 @@ def portrait():
                    emit(XP, "#CircularXPProgressBlur_FG", "#CircularXPProgress_FG"), "border-color")),
         *sub("Имя героя", text("unit.name", name, "#ffffff", 14, hi=32)),
         *sub("Урон, броня, скорость", text("stats.label", stats, "#cccccc", 14, hi=28)),
-        *sub("Положение", block("por", "#PortraitGroup")),
+        *sub("Положение", block("por", "#PortraitGroup", also=("#stats_container",),
+                                   anchor={"side": "left", "margin": 52, "width": 159, "origin": 0.5},
+                                   carry=PORTRAIT_FOLLOWERS)),
     ]

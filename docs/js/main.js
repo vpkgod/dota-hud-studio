@@ -351,6 +351,7 @@ async function start() {
   $('pvEnemy').addEventListener('change', (e) => stage.classList.toggle('enemy', e.target.checked));
   $('pvAlt').addEventListener('change', (e) => stage.classList.toggle('alt-held', e.target.checked));
   $('pvAghs').addEventListener('change', (e) => stage.classList.toggle('aghs-on', e.target.checked));
+  $('pvNoItems').addEventListener('change', (e) => stage.classList.toggle('no-items', e.target.checked));
   $('pvHp').addEventListener('input', refreshStage);
   $('pvMp').addEventListener('input', refreshStage);
   $('pvRatio').addEventListener('change', () => view.refit());

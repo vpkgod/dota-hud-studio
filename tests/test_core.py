@@ -197,3 +197,68 @@ class NewFeaturesTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class BottomPanelAnchorTest(unittest.TestCase):
+    """Ширина нижней панели зависит от героя: блок за серединой привязываем к другому краю."""
+
+    def test_portrait_moved_right_sticks_to_right_edge(self):
+        css = cssgen.generate({"por.offset": {"x": 605, "y": 3}})["hud/hud_reborn.css"]
+        self.assertIn("#PortraitGroup,#stats_container", css)
+        self.assertIn("horizontal-align: right", css)
+        self.assertIn("margin-right: 124px", css)  # 940 - (52 + 605) - 159
+        self.assertIn("translateX( 0px ) translateY( 3px )", css)
+
+    def test_small_move_keeps_own_edge(self):
+        css = cssgen.generate({"por.offset": {"x": 100, "y": 0}})["hud/hud_reborn.css"]
+        self.assertNotIn("horizontal-align", css)
+        self.assertIn("translateX( 100px )", css)
+
+    def test_inventory_moved_left_sticks_to_left_edge(self):
+        css = cssgen.generate({"inv.offset": {"x": -600, "y": 0}})["hud/hud_reborn.css"]
+        self.assertIn("horizontal-align: left", css)
+        self.assertIn("margin-left: 45px", css)  # 940 - (93 + 600) - 202
+
+
+
+class FollowersTest(unittest.TestCase):
+    def test_talent_hint_follows_abilities_and_talent_button(self):
+        css = cssgen.generate({"ab.offset": {"x": -158, "y": 8}, "talent.offset": {"x": 10, "y": 0}})["hud/hud_reborn.css"]
+        self.assertIn("#level_stats_frame,#StatBranchHotkey\n{\n\ttransform: translateX( -148px ) translateY( 8px );\n}", css)
+
+    def test_inventory_color_under_background(self):
+        css = cssgen.generate({"inv.bgColor": "#22111100"})["hud/dota_hud_inventory.css"]
+        self.assertIn(".Reborn #inventory_items\n{\n\tbackground-color: #22111100;\n}", css)
+
+
+class PortraitFollowersTest(unittest.TestCase):
+    """Имя героя и значок тира — отдельные панели игры: едут за портретом."""
+
+    def test_small_move_shifts_name_and_badge(self):
+        css = cssgen.generate({"por.offset": {"x": 40, "y": -5}})["hud/hud_reborn.css"]
+        for sel in ("#unitname", "#PortraitHeroBadgeOverlay", "#PortraitHeroBadge"):
+            self.assertIn(f"{sel}\n{{\n\ttransform: translateX( 40px ) translateY( -5px );\n}}", css)
+
+    def test_name_sticks_to_right_edge_with_portrait(self):
+        css = cssgen.generate({"por.offset": {"x": 605, "y": 0}})["hud/hud_reborn.css"]
+        self.assertIn("#unitname\n{\n\thorizontal-align: right;\n\tmargin-left: 0px;\n\tmargin-right: 124px;", css)
+
+    def test_scale_alone_moves_followers(self):
+        css = cssgen.generate({"por.scale": 80})["hud/hud_reborn.css"]
+        self.assertIn("#unitname\n{\n\tui-scale: 80%;\n\ttransform: translateX( 15.9px ) translateY( 29px );", css)
+
+
+class RoundSlotsTest(unittest.TestCase):
+    """Слой круглых слотов игра не рисует, если на нём transform или у родителя overflow: noclip."""
+
+    def test_round_slots_move_with_margins_only(self):
+        css = cssgen.generate({"round.offset": {"x": -52.5, "y": 4}})["hud/hud_reborn.css"]
+        rule = css[css.index("#inventory_composition_layer_container"):]
+        rule = rule[:rule.index("}")]
+        self.assertNotIn("transform", rule)
+        self.assertIn("margin-right: 70.5px", rule)
+        self.assertIn("margin-bottom: -4px", rule)
+
+    def test_no_noclip_anywhere(self):
+        css = cssgen.generate({"inv.offset": {"x": -600, "y": 0}, "por.offset": {"x": 600, "y": 0}})["hud/hud_reborn.css"]
+        self.assertNotIn("noclip", css)

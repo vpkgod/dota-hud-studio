@@ -21,6 +21,7 @@ GLYPH = "hud/dota_hud_glyph.css"
 RADAR = "dota_hud_radar_button.css"
 
 REBORN_IMG = "panorama/images/hud/reborn/"
+HUD_IMG = "panorama/images/hud/"
 FACETS_IMG = "panorama/images/hud/facets/"
 
 NO_SHADOW = {"on": False, "c": "#000000", "w": 2}
@@ -88,6 +89,13 @@ def text(cid, target, default_color, default_size, lo=8, hi=48):
             outline(f"{cid}Outline", "Обводка", target)]
 
 
+
+
+# Свечение «можно взять талант» и подсказка клавиши стоят в игре на месте кнопки талантов, но вне полосы
+# способностей: двигаем их на сумму сдвигов полосы и самой кнопки.
+TALENT_HINT = (emit(REBORN, "#level_stats_frame", "#StatBranchHotkey", sum=["ab.offset", "talent.offset"]),)
+
+
 def sub(title, *items):
     """Подраздел на панели справа. items — настройки или списки настроек."""
     flat = []
@@ -96,16 +104,33 @@ def sub(title, *items):
     return [{**control, "sub": title} for control in flat]
 
 
-def block(prefix, selector, scale=True, file=REBORN, lo=40, hi=200):
-    """Общие настройки блока: размер, положение, видимость, показ."""
-    target = emit(file, selector)
+def block(prefix, selector, scale=True, file=REBORN, lo=40, hi=200, also=(), anchor=None, carry=()):
+    """Общие настройки блока: размер, положение, видимость, показ.
+
+    also — панели, которые в игре лежат отдельно, но на экране составляют один блок с этой
+    (цифры урона и брони — не часть портрета). Родителям overflow: noclip не пишем:
+    он ломает слой с круглыми слотами (require-composition-layer) — проверено в игре.
+    anchor — у какого края нижней панели блок стоит в игре: {"side", "margin", "width"}. Ширина панели
+    зависит от числа способностей героя, поэтому блок, унесённый за середину, привязываем к другому краю.
+    carry — панели, которые в игре стоят отдельно, но должны ехать вместе с блоком; у каждой "sum" —
+    чьи сдвиги складываются (подсказка «возьми талант» едет и за способностями, и за кнопкой талантов).
+    """
+    target = emit(file, selector, *also)
+    if anchor and scale:  # игра уменьшает блок к его краю, превью — к точке origin: сдвиг это учитывает
+        anchor = {**anchor, "scale": f"{prefix}.scale"}
+    if anchor:
+        anchor = {**anchor, "offset": f"{prefix}.offset"}
+    # Ведомые панели (имя героя, значок тира) встают туда же относительно блока, где стояли в игре.
+    carry = [{**t, "lead": anchor} if "own" in t else t for t in carry]
     controls = []
     if scale:
+        followers = [t for t in carry if "lead" in t]
         controls.append(num(f"{prefix}.scale", "Размер блока", 100, lo, hi,
-                            [{**target, "prop": "ui-scale"}], unit="%"))
+                            [{**target, "prop": "ui-scale"}, *followers], unit="%"))
     controls.append({"id": f"{prefix}.offset", "label": "Положение на экране", "type": "offset",
                      "default": {"x": 0, "y": 0}, "min": -1400, "max": 1400,
-                     "emit": [{**target, "prop": "transform"}]})
+                     "emit": [{**target, "prop": "transform", **({"anchor": anchor} if anchor else {})},
+                              *carry]})
     controls.append(num(f"{prefix}.opacity", "Видимость", 100, 0, 100,
                         [{**target, "prop": "opacity"}], unit="", div=100))
     controls.append(toggle(f"{prefix}.show", "Показывать", target))

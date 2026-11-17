@@ -33,7 +33,64 @@ function imageDecls(value) {
   return decls;
 }
 
-function declarations(control, target, value) {
+// Ширина нижней панели у героя с четырьмя способностями (как в превью): 219 слева + кнопки + 302 справа.
+const CENTER_WIDTH = 940;
+const CENTER_PER_ABILITY = 4;
+
+export const centerWidth = (values) => CENTER_WIDTH + CENTER_PER_ABILITY * (('ab.size' in values ? values['ab.size'] : 64) - 64);
+
+/** Где блок виден в превью: левый край, ширина после размера, ближе ли к левому краю, ширина панели. */
+function place(anchor, value, values) {
+  const width = centerWidth(values);
+  const size = anchor.width;
+  const scaled = size * (anchor.scale && anchor.scale in values ? values[anchor.scale] : 100) / 100;
+  let left = anchor.side === 'left' ? anchor.margin + value.x : width - (anchor.margin - value.x) - size;
+  left = left + (size - scaled) * (anchor.origin ?? 0.5);
+  return { left, scaled, onLeft: left + scaled / 2 <= width / 2, width };
+}
+
+// Сдвиг блока так, чтобы в игре он встал туда же, где в превью. Блок, унесённый за середину нижней
+// панели, привязываем к другому её краю: панель шире у героев с большим числом способностей.
+// Уменьшенный (ui-scale) блок игра прижимает к своему краю, а превью сжимает к точке origin.
+function offset(target, value, values) {
+  const { anchor } = target;
+  const y = `translateY( ${value.y}px )`;
+  if (!anchor) return [`transform: translateX( ${value.x}px ) ${y}`];
+  const { left, scaled, onLeft, width } = place(anchor, value, values);
+  if (anchor.margins) { // слой с отдельной отрисовкой (круглые слоты) пропадает от transform
+    const down = `margin-bottom: ${number(-value.y)}px`;
+    if (onLeft) return ['horizontal-align: left', 'margin-right: 0px', `margin-left: ${number(left)}px`, down];
+    return ['horizontal-align: right', 'margin-left: 0px', `margin-right: ${number(width - left - scaled)}px`, down];
+  }
+  if (anchor.side === 'left' && onLeft) return [`transform: translateX( ${number(left - anchor.margin)}px ) ${y}`];
+  if (anchor.side === 'right' && !onLeft) return [`transform: translateX( ${number(left + scaled - width + anchor.margin)}px ) ${y}`];
+  if (onLeft) return ['horizontal-align: left', 'margin-right: 0px', `margin-left: ${number(left)}px`, `transform: translateX( 0px ) ${y}`];
+  return ['horizontal-align: right', 'margin-left: 0px', `margin-right: ${number(width - left - scaled)}px`, `transform: translateX( 0px ) ${y}`];
+}
+
+// Ведомая панель (у левого края) сдвигается и сжимается вместе с ведущим блоком, вокруг той же точки,
+// что и в превью. Игра сжимает панель к её левому и нижнему краю, отступы не трогает — поправляем сдвигом.
+function follow(target, values) {
+  const { lead, own } = target;
+  const value = lead.offset in values ? values[lead.offset] : { x: 0, y: 0 };
+  const { left, onLeft, width } = place(lead, value, values);
+  const ratio = (lead.scale && lead.scale in values ? values[lead.scale] : 100) / 100;
+  const home = lead.side === 'left' ? lead.margin : width - lead.margin - lead.width;
+  const ownLeft = left + (own.margin - home) * ratio;
+  const y = `translateY( ${number(value.y + own.bottom * (1 - ratio))}px )`;
+  const decls = ratio === 1 ? [] : [`ui-scale: ${number(ratio * 100)}%`];
+  if (onLeft) return [...decls, `transform: translateX( ${number(ownLeft - own.margin)}px ) ${y}`];
+  return [...decls, 'horizontal-align: right', 'margin-left: 0px',
+    `margin-right: ${number(width - ownLeft - own.width * ratio)}px`, `transform: translateX( 0px ) ${y}`];
+}
+
+function summed(target, values) {
+  const moves = target.sum.map((id) => (id in values ? values[id] : { x: 0, y: 0 }));
+  return { x: moves.reduce((a, m) => a + m.x, 0), y: moves.reduce((a, m) => a + m.y, 0) };
+}
+
+function declarations(control, target, value, values = {}) {
+  if (target.lead) return follow(target, values);
   switch (control.type) {
     case 'fill': return [`${target.prop}: ${panoramaFill(value)}`];
     case 'color': return [`${target.prop}: ${value}`, ...(target.extra || [])];
@@ -42,7 +99,7 @@ function declarations(control, target, value) {
     case 'glow': return value.on ? [`box-shadow: ${value.c} 0px 0px ${value.w * 2}px ${value.w}px`] : [];
     case 'num': return [`${target.prop}: ${number((value + (target.delta || 0)) / control.div)}${control.unit}`];
     case 'toggle': return value ? [] : [target.off];
-    case 'offset': return [`transform: translateX( ${value.x}px ) translateY( ${value.y}px )`];
+    case 'offset': return offset(target, target.sum ? summed(target, values) : value, values);
     case 'image':
       if (!value) return [];
       return target.raw ? target.raw : imageDecls(value);
@@ -60,7 +117,11 @@ function collect(controls, values) {
       if (!files.has(target.file)) files.set(target.file, new Map());
       const rules = files.get(target.file);
       const key = target.sel.join(',');
-      rules.set(key, [...(rules.get(key) || []), ...declarations(control, target, value)]);
+      const old = rules.get(key) || [];
+      let fresh = declarations(control, target, value, values);
+      // Общее правило пишем один раз, сколько бы блоков его ни просили.
+      if (target.sum || target.lead) fresh = fresh.filter((d) => !old.includes(d));
+      rules.set(key, [...old, ...fresh]);
     }
   }
   return files;

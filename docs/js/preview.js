@@ -103,7 +103,8 @@ function inventorySlots(items) {
   const keys = ['Z', 'X', 'C', 'V', 'B', 'N'];
   return keys.map((key, i) => `
     <div class="slot" data-c="inv.slotW">
-      ${i < 5 ? iconImg(items[i], 'item') : `<i class="well" data-c="inv.well">${img('inv.well')}</i>`}
+      <i class="well" data-c="inv.well">${img('inv.well')}</i>
+      ${i < 5 ? iconImg(items[i], 'item') : ''}
       ${i === 2 ? '<b class="charges" data-c="inv.charges">3</b>' : ''}
       ${i === 1 ? '<b class="itemcd" data-c="inv.cd">22</b>' : ''}
       <b class="hot small" data-c="ab.hotkey">${key}</b>
@@ -250,7 +251,8 @@ function attributes(ui) {
 function talentButton(ui) {
   return `
     <div class="talent" data-b="talent" data-tab="talents">
-      <i class="talent-pips-arc" style="background-image:url('${game(ui.attrPips)}')"></i>
+      <i class="talent-pips-arc" data-c="talent.pipsBg">${img('talent.pipsBg')}</i>
+      <i class="talent-pips-fill" data-c="talent.pips" style="--mask:url('${game(ui.attrPipsMask)}')"></i>
       <i class="talent-layer" data-c="talent.bg">${img('talent.bg')}</i>
       <i class="talent-layer talent-tree" data-c="talent.tree">${img('talent.tree')}</i>
       <i class="talent-layer flip" data-tab="tree" data-c="tree.pip10">${img('tree.pip10')}</i>
@@ -266,8 +268,8 @@ function centerPanel(assets) {
     <div class="center">
       <div class="flare-l" data-tab="por" data-c="por.left">${img('por.left')}</div>
       <div class="center-bg" data-tab="ab" data-c="ab.bg"><i class="tint"></i>${img('ab.bg')}</div>
-      <i class="inset-shadow left" style="background-image:url('${game(ui.insetShadow)}')"></i>
-      <i class="inset-shadow right" style="background-image:url('${game(ui.insetShadow)}')"></i>
+      <i class="inset-shadow left" data-tab="ab" data-c="ab.inset">${img('ab.inset')}</i>
+      <i class="inset-shadow right" data-tab="ab" data-c="ab.inset">${img('ab.inset')}</i>
       <div class="por" data-b="por" data-tab="por">
         <div class="por-back" data-c="por.bg">${img('por.bg')}</div>
         <img class="por-hero" src="${asset('img/portrait.jpg')}" alt="" draggable="false">
@@ -277,6 +279,7 @@ function centerPanel(assets) {
       </div>
       <div class="level" data-tab="por" data-c="por.level"><i class="xp-glow"></i><i class="xp-ring" data-c="por.xp"></i><b class="mono">26</b></div>
       <div class="unit-name" data-tab="por" data-c="unit.name">Juggernaut</div>
+      <i class="por-badge" data-tab="por" style="background-image:url('${game(ui.heroBadge)}')"></i>
 
       <div class="bars" data-b="bars" data-tab="bars">
         ${bar('hp', 'hp.fill', 'hp.track', 'hp.label', 'hp.regen', '+14.2', 'hpText')}
@@ -303,7 +306,7 @@ function centerPanel(assets) {
         <div class="inv-over" data-c="inv.image">${img('inv.image')}</div>
         <div class="inv-grid">${inventorySlots(assets.items)}</div>
         <div class="backpack">${assets.items.slice(15, 18).map((src, i) => `
-          <div class="pack" style="background-image:url('${game(ui.backpack)}')">${i < 2 ? iconImg(src, 'item') : ''}</div>`).join('')}</div>
+          <div class="pack" data-c="inv.packSlot">${img('inv.packSlot')}<i class="pack-shade"></i>${i < 2 ? iconImg(src, 'item') : ''}</div>`).join('')}</div>
       </div>
 
       <div class="flare-r" data-tab="por" data-c="por.right">${img('por.right')}</div>
