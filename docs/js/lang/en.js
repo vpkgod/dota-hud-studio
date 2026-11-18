@@ -97,6 +97,7 @@ export default {
   'Любой цвет': 'Any color',
   'Прозрачность': 'Opacity',
   'Код цвета': 'Color code',
+  'Мои цвета': 'My colors',
   'Готово': 'Done',
 
   // Окно «Скачать худ»

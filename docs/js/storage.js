@@ -2,7 +2,9 @@
 const PROJECT_KEY = 'hudstudio.project.v1';
 const VERSIONS_KEY = 'hudstudio.versions.v1';
 const PREFS_KEY = 'hudstudio.prefs.v1';
+const COLORS_KEY = 'hudstudio.colors.v1';
 export const MAX_VERSIONS = 30;
+export const MAX_CUSTOM_COLORS = 16;
 
 function read(key, fallback) {
   try {
@@ -44,4 +46,20 @@ export function addVersion(versions, name, values) {
 export function removeVersion(versions, id) {
   const next = versions.filter((v) => v.id !== id);
   return write(VERSIONS_KEY, next) ? next : null;
+}
+
+const HEX_COLOR = /^#[0-9a-f]{6}$/i;
+
+/** Свои цвета, которые выбирали в последний раз. Новые - первыми. */
+export function loadCustomColors() {
+  const list = read(COLORS_KEY, []);
+  return Array.isArray(list) ? list.filter((color) => typeof color === 'string' && HEX_COLOR.test(color)).slice(0, MAX_CUSTOM_COLORS) : [];
+}
+
+/** Добавляет цвет без повторов. Возвращает новый список или null, если сохранить не получилось. */
+export function addCustomColor(colors, color) {
+  if (!HEX_COLOR.test(color)) return colors;
+  const normal = color.toLowerCase();
+  const next = [normal, ...colors.filter((item) => item.toLowerCase() !== normal)].slice(0, MAX_CUSTOM_COLORS);
+  return write(COLORS_KEY, next) ? next : null;
 }
