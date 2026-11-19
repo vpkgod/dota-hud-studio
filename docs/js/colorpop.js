@@ -1,10 +1,14 @@
-// Окошко выбора цвета: готовые цвета, любой цвет и прозрачность простым ползунком.
+// Окошко выбора цвета: готовые цвета, свои цвета, любой цвет и прозрачность простым ползунком.
 import { t } from './i18n.js';
+import { addCustomColor, loadCustomColors } from './storage.js';
 const PALETTE = ['#ffffff', '#c9ced8', '#6c7486', '#000000', '#ff4d4d', '#c8102e', '#ff8a3c', '#ffcc33',
   '#7ddc3a', '#2f9e44', '#1fd6a6', '#22c7f0', '#4165ce', '#7a5cff', '#c04dff', '#ff4fb5'];
 
 let node = null;
 let state = null;
+let custom = [];
+let customWrap = null;
+let customRow = null;
 let afterClose = () => {};
 
 function splitHex(hex) {
@@ -19,6 +23,37 @@ function emit() {
   state.onChange(value);
 }
 
+function pick(color) {
+  state.rgb = color;
+  state.dirty = true;
+  syncFields();
+  emit();
+}
+
+function swatch(color) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.style.background = color;
+  button.setAttribute('aria-label', color);
+  button.addEventListener('click', () => pick(color));
+  return button;
+}
+
+function remember(color) {
+  const rgb = color.slice(0, 7).toLowerCase();
+  if (PALETTE.includes(rgb) || custom.includes(rgb)) return;
+  const next = addCustomColor(custom, rgb);
+  if (!next) return;
+  custom = next;
+  renderCustom();
+}
+
+function renderCustom() {
+  if (!customWrap) return;
+  customRow.replaceChildren(...custom.map(swatch));
+  customWrap.hidden = custom.length === 0;
+}
+
 function build() {
   node = document.createElement('div');
   node.className = 'color-pop';
@@ -27,26 +62,29 @@ function build() {
   node.setAttribute('aria-label', t('Выбор цвета'));
   node.innerHTML = `
     <div class="pop-palette"></div>
+    <div class="pop-custom" hidden>
+      <span class="pop-caption">${t('Мои цвета')}</span>
+      <div class="pop-palette"></div>
+    </div>
     <label class="pop-line">${t('Любой цвет')} <input class="native" type="color"></label>
     <label class="pop-line">${t('Прозрачность')} <input class="alpha" type="range" min="0" max="255"></label>
     <label class="pop-line">${t('Код цвета')} <input class="hex" spellcheck="false"></label>
     <button type="button" class="pop-done">${t('Готово')}</button>`;
-  node.querySelector('.pop-palette').append(...PALETTE.map((color) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.style.background = color;
-    button.setAttribute('aria-label', color);
-    button.addEventListener('click', () => { state.rgb = color; syncFields(); emit(); });
-    return button;
-  }));
-  node.querySelector('.native').addEventListener('input', (e) => { state.rgb = e.target.value; emit(); });
+  node.querySelector('.pop-palette').append(...PALETTE.map(swatch));
+  customWrap = node.querySelector('.pop-custom');
+  customRow = customWrap.querySelector('.pop-palette');
+  renderCustom();
+  node.querySelector('.native').addEventListener('input', (e) => pick(e.target.value));
+  node.querySelector('.native').addEventListener('change', (e) => remember(e.target.value));
   node.querySelector('.alpha').addEventListener('input', (e) => { state.alpha = 255 - Number(e.target.value); emit(); });
   node.querySelector('.hex').addEventListener('change', (e) => {
     const text = e.target.value.trim();
     if (!/^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/.test(text)) { e.target.value = joinHex(state.rgb, state.alpha); return; }
     Object.assign(state, splitHex(text));
+    state.dirty = true;
     syncFields();
     state.onChange(text);
+    remember(text);
   });
   node.querySelector('.pop-done').addEventListener('click', closeColorPop);
   document.body.append(node);
@@ -63,6 +101,7 @@ function syncFields() {
 }
 
 export function closeColorPop() {
+  if (state?.dirty) remember(state.rgb);
   if (node) node.hidden = true;
   state = null;
   afterClose();
@@ -78,7 +117,9 @@ export function isColorPopOpen() {
 
 export function openColorPop(anchor, value, onChange) {
   if (!node) build();
-  state = { ...splitHex(value), onChange };
+  custom = loadCustomColors();
+  renderCustom();
+  state = { ...splitHex(value), onChange, dirty: false };
   syncFields();
   node.hidden = false;
   const box = anchor.getBoundingClientRect();

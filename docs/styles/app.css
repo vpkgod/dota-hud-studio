@@ -533,6 +533,8 @@ button.primary .badge { background: var(--on-primary); color: var(--primary); ma
 .pop-palette { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; }
 .pop-palette button { min-height: 26px; padding: 0; border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .2); transition: border-radius .2s var(--spring), transform .2s var(--spring); }
 .pop-palette button:hover { border-radius: 50%; transform: scale(1.12); }
+.pop-custom { display: grid; gap: 6px; padding-top: 10px; border-top: 1px solid var(--outline-variant); }
+.pop-caption { font-size: 12px; font-weight: 550; color: var(--on-surface-variant); }
 .pop-line { display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: 8px; font-size: 13px; color: var(--on-surface-variant); }
 .pop-line .native { width: 100%; height: 36px; padding: 0; border: 0; border-radius: 10px; background: none; }
 .pop-line .hex { width: 100%; }
