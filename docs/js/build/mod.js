@@ -1,6 +1,7 @@
 // Сборка мода целиком: стили игры + наши правила, картинки и архив pakNN_dir.vpk.
 import { generateCompact, imageGamePath, imagesUsed, replacedTextures } from './cssgen.js';
 import { decodePng } from './png.js';
+import { resizeRgba } from './resize.js';
 import { compileStyle, compileTexture } from './resource.js';
 import { packVpk } from './vpk.js';
 
@@ -14,9 +15,10 @@ export class BuildError extends Error {}
 
 /**
  * loadStyle(имя) → текст оригинального стиля игры; loadPng(id) → Uint8Array с PNG.
+ * sizes — { путь PNG игры: [ширина, высота] }: подменённый файл игры встаёт в размер оригинала.
  * Возвращает { name, bytes, files: [{ path, size }] }.
  */
-export async function buildMod({ controls, values, slot, loadStyle, loadPng }) {
+export async function buildMod({ controls, values, slot, loadStyle, loadPng, sizes = {} }) {
   if (!validSlot(slot)) throw new BuildError(`Номер файла должен быть от ${MIN_SLOT} до ${MAX_SLOT}.`);
   const rules = generateCompact(controls, values);
   const replaced = replacedTextures(controls, values);
@@ -28,25 +30,33 @@ export async function buildMod({ controls, values, slot, loadStyle, loadPng }) {
     const original = await loadStyle(name);
     files.push({ path: `panorama/styles/${name.replace(/\.css$/, '.vcss_c')}`, data: compileStyle(original + text) });
   }
-  const textures = new Map();
-  async function texture(id) {
-    if (!textures.has(id)) {
+  const decoded = new Map();
+  async function pixels(id) {
+    if (!decoded.has(id)) {
       const png = await loadPng(id);
       if (!png) throw new BuildError('Одна из картинок не найдена. Загрузи её заново.');
       try {
-        const { width, height, rgba } = await decodePng(png);
-        textures.set(id, compileTexture(rgba, width, height));
+        decoded.set(id, await decodePng(png));
       } catch {
         throw new BuildError('Одна из картинок повреждена или слишком большая. Загрузи её заново.');
       }
     }
-    return textures.get(id);
+    return decoded.get(id);
+  }
+  async function texture(id, size) {
+    const { width, height, rgba } = await pixels(id);
+    const [w, h] = size || [width, height];
+    try {
+      return compileTexture(resizeRgba(rgba, width, height, w, h), w, h);
+    } catch {
+      throw new BuildError('Одна из картинок повреждена или слишком большая. Загрузи её заново.');
+    }
   }
   for (const id of [...imagesUsed(controls, values)].sort()) {
     files.push({ path: `${imageGamePath(id)}.vtex_c`, data: await texture(id) });
   }
   for (const [path, id] of Object.entries(replaced).sort()) {
-    files.push({ path: `${path}.vtex_c`, data: await texture(id) });
+    files.push({ path: `${path}.vtex_c`, data: await texture(id, sizes[`${path}.png`]) });
   }
   const bytes = packVpk(files);
   return { name: vpkName(slot), bytes, files: files.map((f) => ({ path: f.path, size: f.data.length })) };

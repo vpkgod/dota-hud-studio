@@ -5,6 +5,7 @@
 
 import json
 import shutil
+import struct
 import sys
 import tempfile
 from pathlib import Path
@@ -25,8 +26,19 @@ def preview_images() -> list:
     manifest = preview_manifest()
     listed = [manifest["hero"], *manifest["team"], *manifest["icons"], *manifest["spells"], *manifest["items"], manifest["overview"],
               manifest["innate"], manifest["gold"], manifest["treeIcon"], manifest["ultReady"], *manifest["ui"].values()]
-    previews = [c["preview"] for c in catalog.controls().values() if c["type"] == "image" and c["preview"]]
-    return sorted({*listed, *previews})
+    return sorted({*listed, *originals()})
+
+
+def originals() -> list:
+    """Файлы игры, которые заменяют картинки-настройки: их можно скачать на сайте в родном размере."""
+    return sorted({path for c in catalog.controls().values() if c["type"] == "image" for path in c["originals"]})
+
+
+def png_size(path: Path) -> list:
+    head = path.read_bytes()[:24]
+    if head[:8] != b"\x89PNG\r\n\x1a\n":
+        raise ValueError(f"{path} — не PNG")
+    return list(struct.unpack(">II", head[16:24]))
 
 
 def _dump_raw(cfg: Config, paths: list, dest: Path, run) -> None:
@@ -71,8 +83,9 @@ def _write_images(cache_root: Path, site: Path, extra=()) -> None:
 
 
 def _write_catalog(cfg: Config, site: Path, shop=None) -> None:
+    sizes = {rel: png_size(site / "game" / rel) for rel in originals()}
     data = {"areas": catalog.AREAS, "groups": catalog.groups(), "preview": {**preview_manifest(), "shop": shop or {}},
-            "styles": style_files(), "game": _game_version(cfg)}
+            "styles": style_files(), "game": _game_version(cfg), "sizes": sizes}
     target = site / "data/catalog.json"
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), "utf8")

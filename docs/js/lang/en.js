@@ -554,4 +554,13 @@ export default {
   'Готов': 'Ready',
   'Значки ультимейта': 'Ultimate icons',
   'Нет маны': 'No mana',
+  // Оригиналы картинок
+  'Скачать картинку игры в её настоящем размере': 'Download the game image at its real size',
+  '{label}: скачать оригинал {size}': '{label}: download original {size}',
+  'оригинал': 'original',
+  'Скачать оригинал, {size}': 'Download original, {size}',
+  'Скачать оригинал:': 'Download original:',
+  'Размер совпадает с оригиналом.': 'Same size as the original.',
+  'Твоя картинка {mine}. При сборке она станет {size}, как в игре.': 'Your image is {mine}. The build will resize it to {size}, as in the game.',
+  ' и ': ' and ',
 };

@@ -37,6 +37,9 @@ class ResourceTest(unittest.TestCase):
         self.assertEqual(resource.panorama_text(raw), "#B{width: 1px;}")
 
 
+FAKE_PNG = b"\x89PNG\r\n\x1a\n\0\0\0\rIHDR" + struct.pack(">II", 72, 40)
+
+
 class ExportTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -51,7 +54,7 @@ class ExportTest(unittest.TestCase):
         for rel in export.preview_images():
             path = self.cache / rel
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_bytes(b"png")
+            path.write_bytes(FAKE_PNG)
         (self.cache / "panorama/styles/hud").mkdir(parents=True, exist_ok=True)
         (self.cache / "panorama/styles/hud/hud_reborn.css").write_text("x", "utf8")
         (self.cache / ".done").write_text(assets.CACHE_VERSION, "utf8")
@@ -82,6 +85,15 @@ class ExportTest(unittest.TestCase):
             self.assertEqual((site / "gamecss" / name).read_text("utf8"), f"/*{compiled}*/")
         for rel in export.preview_images():
             self.assertTrue((site / "game" / rel).is_file(), rel)
+        self.assertEqual(set(data["sizes"]), set(export.originals()))
+        self.assertEqual(data["sizes"]["panorama/images/hud/facets/innate_icon_large_png.png"], [72, 40])
+
+    def test_every_replaced_game_file_can_be_downloaded(self):
+        for control in catalog.controls().values():
+            if control.get("replace"):
+                self.assertEqual(control["originals"], [f"{p}.png" for p in control["replace"]])
+            elif control["type"] == "image":
+                self.assertEqual(control["originals"], [control["preview"]] if control["preview"] else [])
 
     def test_every_setting_knows_its_style_file(self):
         files = set(export.style_files())

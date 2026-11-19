@@ -234,7 +234,7 @@ async function start() {
   const panel = createPanel({
     root: $('panel'), store, areas, groups,
     tools: {
-      upload, uploads: images.uploads, imageUrl: images.url, applyTheme,
+      upload, uploads: images.uploads, imageUrl: images.url, applyTheme, originalSize: (path) => data.sizes?.[path] || null,
       tint: tinter.tintOne, untinted: tinter.untinted, tintAll: tinter.tintAll, untintAll: tinter.untintAll,
     },
     onHover: hint,
@@ -337,7 +337,7 @@ async function start() {
   });
 
   const exporter = createExporter({
-    dialog: $('downloadDialog'), store, controls: all, images, game: data.game || {}, prefs,
+    dialog: $('downloadDialog'), store, controls: all, images, game: data.game || {}, sizes: data.sizes || {}, prefs,
     changedCount: panel.changedCount,
   });
   $('downloadBtn').addEventListener('click', exporter.open);

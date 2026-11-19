@@ -184,7 +184,8 @@ const FITS = [['stretch', t('Растянуть')], ['cover', t('Заполни�
 
 /**
  * Картинка: своя вместо оригинала, как её вписать, прозрачность и перекраска.
- * tools: upload(file) → id | null, uploads() → [id], imageUrl(id), tint(control, value, tint, done), untinted(value).
+ * tools: upload(file) → id | null, uploads() → [id], imageUrl(id), tint(control, value, tint, done), untinted(value),
+ * originalSize(путь) → [ширина, высота] | null.
  */
 function imageWidget(control, value, change, tools) {
   let current = value;
@@ -256,13 +257,47 @@ function imageWidget(control, value, change, tools) {
         h('label', { class: 'mini' }, h('span', { text: t('Светлее / темнее') }), bright.node)));
   }
 
+  /** Оригинал из игры в родном размере: чтобы нарисовать свою картинку по нему и загрузить обратно. */
+  function originals() {
+    const paths = control.originals || [];
+    if (!paths.length) return null;
+    const several = paths.length > 1;
+    const links = paths.map((path) => {
+      const size = tools.originalSize(path);
+      const text = size ? `${size[0]}×${size[1]}` : t('оригинал');
+      const link = h('a', { class: 'original', href: `game/${path}`, download: path.split('/').pop(),
+        title: t('Скачать картинку игры в её настоящем размере'), 'aria-label': t('{label}: скачать оригинал {size}', { label: control.label, size: text }) },
+      icon('download'), h('span', { text: several ? text : t('Скачать оригинал, {size}', { size: text }) }));
+      return link;
+    });
+    const parts = [several ? h('span', { text: t('Скачать оригинал:') }) : null, ...links];
+    return h('div', { class: 'originals' }, parts);
+  }
+
+  /** Подмена файла игры встаёт в размер оригинала: человеку говорим об этом, если размеры разные. */
+  function sizeNote() {
+    if (!current || !control.replace) return null;
+    const sizes = (control.originals || []).map(tools.originalSize).filter(Boolean);
+    if (!sizes.length) return null;
+    const note = h('small', { class: 'size-note' });
+    const probe = new Image();
+    probe.onload = () => {
+      const fits = sizes.every(([w, hgt]) => w === probe.naturalWidth && hgt === probe.naturalHeight);
+      note.textContent = fits ? t('Размер совпадает с оригиналом.')
+        : t('Твоя картинка {mine}. При сборке она станет {size}, как в игре.', {
+          mine: `${probe.naturalWidth}×${probe.naturalHeight}`, size: sizes.map(([w, hgt]) => `${w}×${hgt}`).join(t(' и ')) });
+    };
+    probe.src = tools.imageUrl(current.id);
+    return note;
+  }
+
   function render() {
     const canTint = (current || control.preview) && !current?.tint;
     const actions = h('div', { class: 'image-actions' },
       button('ghost', current ? t('Заменить') : t('Загрузить свою'), chooseFile),
       canTint ? button('ghost', t('Перекрасить'), () => tools.tint(control, current, DEFAULT_TINT, emit), { title: t('Задать картинке свой цвет, сохранив её рисунок') }) : null,
       current ? button('link', t('вернуть оригинал'), () => emit(null)) : null);
-    const side = [actions];
+    const side = [actions, originals(), sizeNote()].filter(Boolean);
     const tuning = [];
     if (current && !control.fixed && current.fit !== 'original') {
       tuning.push(segmented(FITS, current.fit, (fit) => { current = { ...current, fit }; change(current); }, t('Как вписать картинку')).node);

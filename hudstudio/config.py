@@ -30,5 +30,5 @@ def load_config() -> Config:
         game_dir=dota / "game/dota",
         data_dir=Path(env("HUDSTUDIO_DATA", str(PROJECT_DIR))),
         site_dir=Path(env("HUDSTUDIO_SITE", str(PROJECT_DIR / "docs"))),
-        decompiler=env("HUDSTUDIO_DECOMPILER", "Source2Viewer-CLI"),
+        decompiler=env("HUDSTUDIO_DECOMPILER", str(PROJECT_DIR / "tools/s2v.sh")),
     )

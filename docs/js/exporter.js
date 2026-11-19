@@ -13,7 +13,7 @@ const LANGUAGES = [
 ];
 const sizeText = (bytes) => (bytes < 1024 * 1024 ? t('{n} КБ', { n: Math.max(1, Math.round(bytes / 1024)) }) : t('{n} МБ', { n: (bytes / 1024 / 1024).toFixed(1) }));
 
-export function createExporter({ dialog, store, controls, images, game, prefs, changedCount }) {
+export function createExporter({ dialog, store, controls, images, game, sizes = {}, prefs, changedCount }) {
   const styleCache = new Map();
 
   async function loadStyle(name) {
@@ -55,7 +55,7 @@ export function createExporter({ dialog, store, controls, images, game, prefs, c
       status.className = 'status';
       status.textContent = t('Собираю худ…');
       try {
-        const mod = await buildMod({ controls, values: store.get(), slot: n, loadStyle, loadPng: images.bytes });
+        const mod = await buildMod({ controls, values: store.get(), slot: n, loadStyle, loadPng: images.bytes, sizes });
         downloadBlob(mod.name, new Blob([mod.bytes], { type: 'application/octet-stream' }));
         status.className = 'status good';
         status.textContent = t('Готово: {name}, {size}. Файл ушёл в папку загрузок.', { name: mod.name, size: sizeText(mod.bytes.length) });

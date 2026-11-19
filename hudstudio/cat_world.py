@@ -39,7 +39,9 @@ def minimap():
              image("minimap.glyphBtn", "Глиф", [emit(GLYPH, "#GlyphButton", "#RadiantGlyphButton", "#DireGlyphButton")],
                    REBORN_IMG + "icon_glyph_on_psd.png"),
              image("minimap.glyphOff", "Глиф на перезарядке",
-                   [emit(GLYPH, ".CoolingDown #GlyphButton", ".CoolingDown #RadiantGlyphButton", ".CoolingDown #DireGlyphButton")],
+                   # С обновления 19.11.2026 эту же картинку игра ставит, пока глиф действует (.GlyphActive).
+                   [emit(GLYPH, ".CoolingDown #GlyphButton", ".CoolingDown #RadiantGlyphButton", ".CoolingDown #DireGlyphButton",
+                         ".GlyphActive #GlyphButton", ".GlyphActive #RadiantGlyphButton", ".GlyphActive #DireGlyphButton")],
                    REBORN_IMG + "icon_glyph_off_psd.png"),
              image("minimap.roshanBg", "Рамка таймера Рошана", [emit(ROSHAN, "DOTARoshanTimer")],
                    REBORN_IMG + "roshan_timer_bg_v2_png.png", "cover"),

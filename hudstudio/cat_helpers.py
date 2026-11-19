@@ -67,14 +67,14 @@ def image(cid, label, targets, preview, fit="100% 100%", game_sized=True):
     """game_sized=False — у панели в игре размер фона не задан (#QuickBuyRows): картинка «как в игре»
     встала бы своим размером посередине, поэтому для неё пишем размер, как в превью."""
     control = {"id": cid, "label": label, "type": "image", "default": None, "emit": targets,
-               "preview": preview, "preview_fit": fit}
+               "preview": preview, "preview_fit": fit, "originals": [preview] if preview else []}
     return control if game_sized else {**control, "game_sized": False}
 
 
 def texture(cid, label, game_paths, hint=""):
     """Подмена самого файла игры: для панелей, картинка которых задана не через CSS."""
     return {"id": cid, "label": label, "type": "image", "default": None, "emit": [], "replace": list(game_paths),
-            "preview": f"{game_paths[0]}.png", "preview_fit": "contain", "fixed": True, "hint": hint}
+            "originals": [f"{path}.png" for path in game_paths], "preview": f"{game_paths[0]}.png", "preview_fit": "contain", "fixed": True, "hint": hint}
 
 
 def outline(cid, label, target, preview_off=PREVIEW_TEXT_SHADOW):

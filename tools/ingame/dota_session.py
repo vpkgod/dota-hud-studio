@@ -63,7 +63,7 @@ def hero_card(hero: str) -> Path:
     png = CARDS / f"{rel}.png"
     if not png.is_file():
         CARDS.mkdir(parents=True, exist_ok=True)
-        subprocess.run(["Source2Viewer-CLI", "-i", str(PAK01), "-f", f"{rel}.vtex_c", "-o", str(CARDS), "-d"],
+        subprocess.run([str(Path(__file__).resolve().parents[1] / "s2v.sh"), "-i", str(PAK01), "-f", f"{rel}.vtex_c", "-o", str(CARDS), "-d"],
                        capture_output=True, check=True, timeout=300)
     if not png.is_file():
         raise FileNotFoundError(f"Нет картинки героя {hero} в файлах игры")
