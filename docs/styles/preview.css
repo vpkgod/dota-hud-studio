@@ -125,8 +125,10 @@
 .inset-shadow.right { right: 295px; transform: scaleX(-1); }
 .por { left: 52px; width: 159px; height: 145px; overflow: hidden; display: var(--por-show); opacity: var(--por-opacity); transform: var(--por-offset) scale(var(--por-scale)); transform-origin: bottom center; }
 .por-back { position: absolute; inset: 0; }
-.por-hero { position: absolute; left: -16px; bottom: -14px; width: 175px; height: 175px; object-fit: cover; }
-.por-fade { position: absolute; inset: 0; background: linear-gradient(to right, #0000 40%, #0008 60%, #000c 70%, #000e 80%, #000), linear-gradient(#0000 50%, #000); }
+.por-hero { position: absolute; left: -16px; bottom: -14px; width: 175px; height: 175px; object-fit: cover; display: var(--por-video-hide, block); }
+/* Игра растягивает MoviePanel на её размер: «заполнить/вписать» — это размер панели, лишнее режет портрет. */
+.por-video { position: absolute; inset: 0; width: 100%; height: 100%; display: var(--por-video, none); object-fit: var(--por-video-fit, cover); pointer-events: none; }
+.por-fade { display: var(--por-video-hide, block); position: absolute; inset: 0; background: linear-gradient(to right, #0000 40%, #0008 60%, #000c 70%, #000e 80%, #000), linear-gradient(#0000 50%, #000); }
 .stats { position: absolute; right: 5px; top: 1px; display: grid; justify-items: end; z-index: 2; }
 .stats span { display: flex; align-items: center; height: 23.5px; gap: 2px; }
 .stats b, .stats em { font-size: calc(var(--stats-labelSize) + 1px); font-weight: 500; font-style: normal; color: var(--stats-label); text-shadow: var(--stats-labelOutline); }

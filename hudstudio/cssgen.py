@@ -1,5 +1,7 @@
 """Превращает настройки в правила Panorama CSS. Менять чистые значения здесь не нужно."""
 
+import math
+
 from . import catalog
 
 HEADER = "\n\n/* === Dota HUD Studio === */\n"
@@ -44,6 +46,23 @@ def _image_decls(value, control=None) -> list[str]:
     if value["opacity"] < 1:
         decls.append(f"background-img-opacity: {_number(value['opacity'])}")
     return decls
+
+
+def _video_size(control, value) -> list[str]:
+    """Игра растягивает видео на всю панель. Чтобы не сплющить его, панель делаем с пропорциями видео:
+    больше портрета («заполнить», края обрежет родитель) или меньше («вписать»). Целые пиксели вниз/вверх
+    одинаково считают и Python, и JS."""
+    if value["fit"] == "stretch":
+        return ["width: 100%", "height: 100%"]
+    box_w, box_h = control["box"]
+    wider = value["w"] * box_h > box_w * value["h"]
+    if (value["fit"] == "cover") == wider:  # подгоняем по высоте
+        size = value["w"] * box_h / value["h"]
+        width = math.ceil(size) if value["fit"] == "cover" else math.floor(size)
+        return [f"width: {width}px", f"height: {box_h}px"]
+    size = value["h"] * box_w / value["w"]
+    height = math.ceil(size) if value["fit"] == "cover" else math.floor(size)
+    return [f"width: {box_w}px", f"height: {height}px"]
 
 
 def _outline(value) -> str:
@@ -156,6 +175,10 @@ def _declarations(control, target, value, values=None) -> list[str]:
         if not value:
             return []
         return target["raw"] if "raw" in target else _image_decls(value, control)
+    if kind == "video":
+        if not value:
+            return []
+        return [*_video_size(control, value), *target["raw"]] if target.get("fit") else target["raw"]
     raise ValueError(f"Неизвестный тип настройки: {kind}")
 
 
@@ -196,6 +219,12 @@ def images_used(values: dict) -> set:
     """Картинки, на которые ссылается CSS. Подмена файлов игры считается отдельно."""
     return {value["id"] for cid, control in catalog.controls().items()
             if control["type"] == "image" and control["emit"] and (value := values.get(cid))}
+
+
+def videos_used(values: dict) -> dict:
+    """{путь видео в игре: id файла}."""
+    return {control["game_path"]: value["id"] for cid, control in catalog.controls().items()
+            if control["type"] == "video" and (value := values.get(cid))}
 
 
 def replaced_textures(values: dict) -> dict:

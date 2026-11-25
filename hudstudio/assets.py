@@ -8,6 +8,7 @@ from pathlib import Path
 
 from .tools import run_tool
 from .config import Config
+from .pak import VIEW_DIR, reader_args
 
 HERO = "juggernaut"
 TEAM_HEROES = ["axe", "lina", "pudge", "crystal_maiden", "sniper", "tusk", "mirana", "invoker", "phantom_assassin"]
@@ -179,10 +180,10 @@ class Assets:
             self._state = {"state": state, "message": message}
 
     def _extract(self, prefix: str, dest: Path) -> None:
-        self._run([self._cfg.decompiler, "-i", str(self._cfg.pak01), "-f", prefix, "-o", str(dest), "-d"])
+        self._run([self._cfg.decompiler, *self._pak, "-f", prefix, "-o", str(dest), "-d"])
 
     def _extract_overview(self, dest: Path) -> None:
-        _, listing = self._run([self._cfg.decompiler, "-i", str(self._cfg.pak01), "--vpk_list"])
+        _, listing = self._run([self._cfg.decompiler, *self._pak, "--vpk_list"])
         found = [(int(m.group(1)), m.group(0)) for m in OVERVIEW.finditer(listing)]
         if not found:
             return
@@ -203,7 +204,7 @@ class Assets:
 
     def _prune(self, keep: Path) -> None:
         for path in self._cfg.cache.iterdir():
-            if path.is_dir() and path != keep:
+            if path.is_dir() and path != keep and path.name != VIEW_DIR:
                 shutil.rmtree(path)
 
     def prepare(self) -> None:
@@ -214,6 +215,7 @@ class Assets:
             if not (marker.is_file() and marker.read_text("utf8") == CACHE_VERSION):
                 self._set("working", "Распаковываю файлы Dota 2 (один раз, примерно 30 секунд)…")
                 root.mkdir(parents=True, exist_ok=True)
+                self._pak = reader_args(self._cfg)  # один раз до потоков: копия pak01 создаётся здесь
                 with ThreadPoolExecutor(max_workers=4) as pool:
                     list(pool.map(lambda p: self._extract(p, root), _prefixes()))
                 self._extract_overview(root)

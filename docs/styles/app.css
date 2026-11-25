@@ -382,9 +382,9 @@ button.primary .badge { background: var(--on-primary); color: var(--primary); ma
 .row.changed { background: color-mix(in srgb, var(--tertiary-container) 38%, var(--surface-lowest)); }
 .row.changed::before { transform: scaleY(1); }
 /* Заливка и картинка занимают всю ширину: название сверху, управление под ним. */
-.row.type-fill, .row.type-image { grid-template-columns: minmax(0, 1fr) 36px; }
-.row.type-fill .row-body, .row.type-image .row-body { grid-column: 1 / -1; grid-row: 2; }
-.row.type-fill .row-reset, .row.type-image .row-reset { grid-column: 2; grid-row: 1; }
+.row.type-fill, .row.type-image, .row.type-video { grid-template-columns: minmax(0, 1fr) 36px; }
+.row.type-fill .row-body, .row.type-image .row-body, .row.type-video .row-body { grid-column: 1 / -1; grid-row: 2; }
+.row.type-fill .row-reset, .row.type-image .row-reset, .row.type-video .row-reset { grid-column: 2; grid-row: 1; }
 .row.type-outline, .row.type-glow, .row.type-offset { align-items: start; }
 .row.type-outline .row-label, .row.type-glow .row-label, .row.type-offset .row-label { padding-top: 8px; }
 .row-label { display: grid; gap: 2px; min-width: 0; }
@@ -444,6 +444,8 @@ button.primary .badge { background: var(--on-primary); color: var(--primary); ma
 }
 .thumb:hover:not(:disabled) { border-radius: 28px; }
 .thumb.over { outline: 3px dashed var(--primary); outline-offset: 3px; border-radius: 32px; }
+.video .thumb { width: 114px; height: 104px; overflow: hidden; } /* пропорции портрета в игре 159×145 */
+.video .thumb video { display: block; width: 100%; height: 100%; pointer-events: none; }
 .image-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
 .originals { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 12.5px; color: var(--on-surface-variant); }
 .original { display: inline-flex; align-items: center; gap: 4px; color: var(--primary); font-weight: 600; text-decoration: none; border-radius: 8px; }

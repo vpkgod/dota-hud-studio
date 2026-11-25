@@ -53,6 +53,22 @@ def _image(raw, control):
     return {**clean, "tint": tint, "base": base}
 
 
+VIDEO_FITS = ("cover", "contain", "stretch")
+MAX_VIDEO_SIDE = 4096
+
+
+def _video(raw, control):
+    """{id, fit, w, h}: w×h — размер самого видео, нужен для «заполнить» и «вписать»."""
+    if not isinstance(raw, dict) or not (isinstance(raw.get("id"), str) and IMAGE_ID.match(raw["id"])):
+        return None
+    w, h = raw.get("w"), raw.get("h")
+    sized = all(isinstance(n, int) and not isinstance(n, bool) and 1 <= n <= MAX_VIDEO_SIDE for n in (w, h))
+    fit = raw.get("fit") if raw.get("fit") in VIDEO_FITS else "cover"
+    if not sized:
+        return {"id": raw["id"], "fit": "stretch", "w": 0, "h": 0}
+    return {"id": raw["id"], "fit": fit, "w": w, "h": h}
+
+
 def _fill(raw, control):
     if not isinstance(raw, dict) or raw.get("dir") not in ("v", "h"):
         return control["default"]
@@ -93,7 +109,7 @@ def _shadow(raw, control):
 
 
 _CLEANERS = {"color": _color, "num": _num, "toggle": _toggle, "offset": _offset,
-             "image": _image, "fill": _fill, "outline": _shadow, "glow": _shadow}
+             "image": _image, "video": _video, "fill": _fill, "outline": _shadow, "glow": _shadow}
 
 
 def sanitize(raw) -> dict:

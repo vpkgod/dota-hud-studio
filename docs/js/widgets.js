@@ -318,9 +318,71 @@ function imageWidget(control, value, change, tools) {
   return { node, sync(next) { current = next; render(); } };
 }
 
+const VIDEO_FITS = [['cover', t('Заполнить')], ['contain', t('Вписать')], ['stretch', t('Растянуть')]];
+
+/**
+ * Видео вместо героя: гифка, картинка, mp4 или webm. Файл переводит в webm tools.uploadVideo(file, progress)
+ * → { id, w, h, seconds } | null; tools.videoUrl(id) — адрес для показа.
+ */
+function videoWidget(control, value, change, tools) {
+  let current = value;
+  let busy = false;
+  const node = h('div', { class: 'image video' });
+  const emit = (next) => { current = next; change(next); render(); };
+  const status = h('small', { class: 'size-note', role: 'status' });
+
+  async function pick(file) {
+    if (!file || busy) return;
+    busy = true;
+    render();
+    status.textContent = t('Готовлю видео…');
+    const made = await tools.uploadVideo(file, (part) => { status.textContent = t('Готовлю видео… {n}%', { n: Math.round(part * 100) }); });
+    busy = false;
+    if (made) emit({ id: made.id, fit: current ? current.fit : 'cover', w: made.w, h: made.h });
+    else render();
+  }
+
+  function chooseFile() {
+    const input = h('input', { type: 'file', accept: 'image/*,video/*,.webm' });
+    input.addEventListener('change', () => pick(input.files[0]));
+    input.click();
+  }
+
+  function thumb() {
+    const box = button('thumb', '', chooseFile, { title: t('Нажми или перетащи сюда гифку или видео'), 'aria-label': t('{label}: выбрать файл', { label: control.label }), disabled: busy });
+    if (current) {
+      const fit = { cover: 'cover', contain: 'contain', stretch: 'fill' }[current.fit];
+      box.append(h('video', { muted: true, loop: true, autoplay: true, playsInline: true, style: { objectFit: fit }, src: tools.videoUrl(current.id) }));
+    } else {
+      box.append(h('span', { text: busy ? t('готовлю…') : t('нет видео') }));
+    }
+    box.addEventListener('dragover', (e) => { e.preventDefault(); box.classList.add('over'); });
+    box.addEventListener('dragleave', () => box.classList.remove('over'));
+    box.addEventListener('drop', (e) => { e.preventDefault(); box.classList.remove('over'); pick(e.dataTransfer.files[0]); });
+    return box;
+  }
+
+  function render() {
+    const actions = h('div', { class: 'image-actions' },
+      button('ghost', current ? t('Заменить') : t('Загрузить гифку или видео'), chooseFile, { disabled: busy }),
+      current && !busy ? button('link', t('вернуть героя'), () => emit(null)) : null);
+    const side = [actions];
+    if (busy) side.push(status);
+    if (current && !busy) {
+      side.push(segmented(VIDEO_FITS, current.fit, (fit) => { current = { ...current, fit }; change(current); render(); }, t('Как вписать видео')).node);
+      if (current.w) side.push(h('small', { class: 'size-note', text: t('Видео {size}. Портрет в игре 159×145.', { size: `${current.w}×${current.h}` }) }));
+    }
+    side.push(h('small', { class: 'size-note', text: t('Подойдут гифка, картинка, mp4 или webm. Видео длиннее 15 секунд обрежется. В игре видео крутится по кругу без звука.') }));
+    node.replaceChildren(h('div', { class: 'image-top' }, thumb(), h('div', { class: 'stack' }, side)));
+  }
+
+  render();
+  return { node, sync(next) { current = next; render(); } };
+}
+
 const WIDGETS = {
   color: colorWidget, fill: fillWidget, num: numWidget, toggle: toggleWidget,
-  offset: offsetWidget, image: imageWidget, outline: shadowWidget, glow: shadowWidget,
+  offset: offsetWidget, image: imageWidget, video: videoWidget, outline: shadowWidget, glow: shadowWidget,
 };
 
 /**

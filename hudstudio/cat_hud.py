@@ -5,7 +5,7 @@
 
 from .cat_helpers import (ABILITY, AGHS, FACETS_IMG, HEALTH, HUD_IMG, INNATE, INVENTORY, REBORN, REBORN_IMG,
                           HIDE_INSET, STATBRANCH, STATS, TALENT_HINT, UNITNAME,
-                          XP, block, color, emit, fill, glow, grad, image, num, outline, sub, text, texture, toggle)
+                          XP, block, color, emit, fill, glow, grad, image, num, outline, sub, text, texture, toggle, video)
 
 
 def _bar_radius(cid, left, right):
@@ -200,11 +200,31 @@ PORTRAIT_FOLLOWERS = (
 )
 
 
+# Видео за портретом: своя разметка hud_reborn с MoviePanel #CustomPortraitVideo внутри #PortraitBacker.
+# Правила те же, что у проверенного в игре шаблона: видео во весь портрет, цветная подложка героя спрятана.
+PORTRAIT_VIDEO_LAYOUT = "panorama/layout/hud/hud_reborn"
+PORTRAIT_VIDEO_FILE = "panorama/videos/hudstudio/portrait.webm"
+
+
+# Модель героя в портрете непрозрачная (свой фон сцены): поверх видео её не оставить — прячем всегда.
+# Проверено в игре 25.11.2026: с моделью видео не видно совсем.
+def portrait_video():
+    center = ["horizontal-align: center", "vertical-align: center"]
+    return video("por.video", "Видео или гифка вместо героя", [
+        emit(REBORN, "#PortraitBacker", raw=["width: 100%", "height: 100%", *center, "z-index: -1", "hittest: false", "overflow: clip"]),
+        emit(REBORN, "#CustomPortraitVideo", raw=center, fit=True),
+        emit(REBORN, "#PortraitBackerColor", raw=["visibility: collapse"]),
+        emit(REBORN, "#stats_container_bg", raw=["opacity: 0"]),
+        emit(REBORN, "#PortraitContainer", raw=["visibility: collapse"]),
+    ], PORTRAIT_VIDEO_LAYOUT, PORTRAIT_VIDEO_FILE, (159, 145))
+
+
 def portrait():
     level = emit(XP, "#LevelLabel")
     name = emit(UNITNAME, "#UnitNameLabel")
     stats = emit(STATS, ".StatRegionLabel")
     return [
+        *sub("Видео", portrait_video()),
         *sub("Картинки",
              image("por.bg", "Фон портрета", [emit(REBORN, "#PortraitBacker")], REBORN_IMG + "inventory_bg_psd.png"),
              image("por.left", "Левое крыло панели", [emit(REBORN, "#left_flare")],

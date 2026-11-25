@@ -1,4 +1,4 @@
-// Картинки пользователя хранятся в самом браузере (IndexedDB). Имя картинки — начало её SHA-256.
+// Картинки и видео пользователя хранятся в самом браузере (IndexedDB). Имя файла — начало его SHA-256.
 import { sha256Hex } from './build/bytes.js';
 
 const DB_NAME = 'hudstudio';
@@ -43,23 +43,23 @@ export async function fileToPng(file) {
  * картинки живут до закрытия вкладки: durable() скажет об этом.
  */
 export async function createImageStore() {
-  const records = new Map(); // id → { blob, tint, url }
+  const records = new Map(); // id → { blob, tint, video, url }
   let db = null;
   try {
     db = await openDb();
     const saved = await run(db, 'readonly', (store) => store.getAll());
-    saved.forEach((r) => records.set(r.id, { blob: r.blob, tint: r.tint, url: URL.createObjectURL(r.blob) }));
+    saved.forEach((r) => records.set(r.id, { blob: r.blob, tint: r.tint, video: Boolean(r.video), url: URL.createObjectURL(r.blob) }));
   } catch {
     db = null;
   }
 
-  async function add(blob, { tint = false } = {}) {
+  async function add(blob, { tint = false, video = false } = {}) {
     const bytes = new Uint8Array(await blob.arrayBuffer());
     const id = (await sha256Hex(bytes)).slice(0, ID_LENGTH);
     if (records.has(id)) return id;
-    records.set(id, { blob, tint, url: URL.createObjectURL(blob) });
+    records.set(id, { blob, tint, video, url: URL.createObjectURL(blob) });
     if (db) {
-      try { await run(db, 'readwrite', (store) => store.put({ id, blob, tint })); } catch { /* останется в памяти */ }
+      try { await run(db, 'readwrite', (store) => store.put({ id, blob, tint, video })); } catch { /* останется в памяти */ }
     }
     return id;
   }
@@ -81,8 +81,11 @@ export async function createImageStore() {
     has: (id) => records.has(id),
     url: (id) => records.get(id)?.url || '',
     blob: (id) => records.get(id)?.blob || null,
-    /** Картинки, которые загрузил человек (без промежуточных результатов перекраски). */
-    uploads: () => [...records].filter(([, r]) => !r.tint).map(([id]) => id),
+    /** Картинки, которые загрузил человек (без промежуточных результатов перекраски и без видео). */
+    uploads: () => [...records].filter(([, r]) => !r.tint && !r.video).map(([id]) => id),
+    /** Видео, которые загрузил человек. */
+    videos: () => [...records].filter(([, r]) => r.video).map(([id]) => id),
+    isVideo: (id) => Boolean(records.get(id)?.video),
     async bytes(id) {
       const record = records.get(id);
       return record ? new Uint8Array(await record.blob.arrayBuffer()) : null;

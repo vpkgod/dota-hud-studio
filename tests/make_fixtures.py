@@ -54,6 +54,9 @@ def _random_value(control, rng):
         return _fill(rng)
     if kind == "image":
         return _image(rng)
+    if kind == "video":
+        return {"id": rng.choice(IDS), "fit": rng.choice(["cover", "contain", "stretch", "x"]),
+                "w": rng.choice([736, 1280, 320, 159, 0, 5000, 12.5, True]), "h": rng.choice([736, 720, 145, 406, 1, -3])}
     return _shadow(rng)
 
 
@@ -66,7 +69,8 @@ def make_cases(seed=7):
         raw = {c["id"]: _random_value(c, rng) for c in controls if rng.random() < share}
         clean = values.sanitize(raw)
         cases.append({"raw": raw, "clean": clean, "css": cssgen.generate(clean),
-                      "images": sorted(cssgen.images_used(clean)), "replaced": cssgen.replaced_textures(clean)})
+                      "images": sorted(cssgen.images_used(clean)), "replaced": cssgen.replaced_textures(clean),
+                      "videos": cssgen.videos_used(clean)})
     return cases
 
 

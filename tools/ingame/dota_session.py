@@ -34,6 +34,7 @@ CONTINUE_BUTTON = (84, 810)  # «Продолжить» на стадии пла
 REST_POINT = (960, 330)  # куда убрать курсор: в мир, подальше от худа и краёв (у краёв камера едет)
 SETTLE_MIN = 8  # после появления героя демо секунд на 10 затемняет экран — раньше не снимаем
 SETTLE_MAX = 90
+EMPTY_GAMEINFO = '"GameInfo"\n{\n\tgame "Dota 2"\n\tFileSystem\n\t{\n\t\tSearchPaths\n\t\t{\n\t\t}\n\t}\n}\n'
 
 
 def log_text() -> str:
@@ -62,8 +63,16 @@ def hero_card(hero: str) -> Path:
     rel = f"panorama/images/heroes/selection/npc_dota_hero_{hero}_png"
     png = CARDS / f"{rel}.png"
     if not png.is_file():
-        CARDS.mkdir(parents=True, exist_ok=True)
-        subprocess.run([str(Path(__file__).resolve().parents[1] / "s2v.sh"), "-i", str(PAK01), "-f", f"{rel}.vtex_c", "-o", str(CARDS), "-d"],
+        # pak01 после обновления 25.11.2026 Source2Viewer 21.1 не открывает: файл достаёт vpkeditcli.
+        raw = CARDS / f"{rel}.vtex_c"
+        raw.parent.mkdir(parents=True, exist_ok=True)
+        subprocess.run(["vpkeditcli", str(PAK01), "--extract", f"{rel}.vtex_c", "-o", str(raw), "--no-progress"],
+                       capture_output=True, check=True, timeout=300)
+        # Пустой gameinfo.gi: иначе Source2Viewer сам подгружает VPK игры и падает на них же.
+        nogame = CARDS / "nogame/dota"
+        nogame.mkdir(parents=True, exist_ok=True)
+        (nogame / "gameinfo.gi").write_text(EMPTY_GAMEINFO, "utf8")
+        subprocess.run([str(Path(__file__).resolve().parents[1] / "s2v.sh"), "-i", str(raw), "--game", str(nogame), "-o", str(png), "-d"],
                        capture_output=True, check=True, timeout=300)
     if not png.is_file():
         raise FileNotFoundError(f"Нет картинки героя {hero} в файлах игры")

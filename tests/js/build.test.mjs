@@ -134,3 +134,33 @@ test('сборка без изменений и с плохим номером �
   await assert.rejects(buildMod({ ...base, loadPng: async () => new Uint8Array([1, 2, 3]), values: { 'ab.bg': { id: 'a'.repeat(16), fit: 'cover', opacity: 1 } }, slot: 80 }), BuildError);
   assert.equal(vpkName(80), 'pak80_dir.vpk');
 });
+
+test('сборка мода с видео: само видео, готовая разметка худа и правила портрета', async () => {
+  const id = 'fedcba9876543210';
+  const webm = new Uint8Array([0x1a, 0x45, 0xdf, 0xa3, 1, 2, 3]);
+  const layout = read('docs/layout/hud_reborn.vxml_c');
+  const asked = [];
+  const result = await buildMod({
+    controls: controls(), values: { 'por.video': { id, fit: 'cover', w: 1280, h: 720 } }, slot: 12,
+    loadStyle: async (name) => `/*${name}*/`,
+    loadPng: async () => null,
+    loadVideo: async (videoId) => { asked.push(videoId); return webm; },
+    loadLayout: async (path) => { asked.push(path); return layout; },
+  });
+  assert.deepEqual(asked, [id, 'panorama/layout/hud/hud_reborn']);
+  const unpacked = unpackVpk(result.bytes);
+  assert.deepEqual(Object.keys(unpacked).sort(), [
+    'panorama/layout/hud/hud_reborn.vxml_c', 'panorama/styles/hud/hud_reborn.vcss_c', 'panorama/videos/hudstudio/portrait.webm']);
+  assert.deepEqual(unpacked['panorama/videos/hudstudio/portrait.webm'], webm);
+  assert.deepEqual(unpacked['panorama/layout/hud/hud_reborn.vxml_c'], layout);
+  const style = text(blocks(unpacked['panorama/styles/hud/hud_reborn.vcss_c']).DATA.subarray(6));
+  assert.ok(style.includes('#PortraitContainer{visibility: collapse;}'));
+  assert.ok(style.includes('#CustomPortraitVideo{width: 258px;height: 145px;'));
+});
+
+test('битое или слишком большое видео не попадает в мод', async () => {
+  const base = { controls: controls(), values: { 'por.video': { id: 'a'.repeat(16), fit: 'stretch', w: 10, h: 10 } }, slot: 80,
+    loadStyle: async () => '', loadPng: async () => null, loadLayout: async () => new Uint8Array(1) };
+  await assert.rejects(buildMod({ ...base, loadVideo: async () => null }), BuildError);
+  await assert.rejects(buildMod({ ...base, loadVideo: async () => new Uint8Array([1, 2, 3, 4, 5]) }), BuildError);
+});

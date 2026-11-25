@@ -36,6 +36,17 @@ function imageDecls(value, control) {
   return decls;
 }
 
+// Игра растягивает видео на всю панель. Чтобы не сплющить его, панель делаем с пропорциями видео:
+// больше портрета («заполнить», края обрежет родитель) или меньше («вписать»). Целые пиксели — как в Python.
+function videoSize(control, value) {
+  if (value.fit === 'stretch') return ['width: 100%', 'height: 100%'];
+  const [boxW, boxH] = control.box;
+  const wider = value.w * boxH > boxW * value.h;
+  const round = value.fit === 'cover' ? Math.ceil : Math.floor;
+  if ((value.fit === 'cover') === wider) return [`width: ${round(value.w * boxH / value.h)}px`, `height: ${boxH}px`];
+  return [`width: ${boxW}px`, `height: ${round(value.h * boxW / value.w)}px`];
+}
+
 // Ширина нижней панели у героя с четырьмя способностями (как в превью): 219 слева + кнопки + 302 справа.
 const CENTER_WIDTH = 940;
 const CENTER_PER_ABILITY = 4;
@@ -109,6 +120,9 @@ function declarations(control, target, value, values = {}) {
     case 'image':
       if (!value) return [];
       return target.raw ? target.raw : imageDecls(value, control);
+    case 'video':
+      if (!value) return [];
+      return target.fit ? [...videoSize(control, value), ...target.raw] : target.raw;
     default: throw new Error(`Неизвестный тип настройки: ${control.type}`);
   }
 }
@@ -158,6 +172,20 @@ export const generateCompact = (controls, values) => generateWith(controls, valu
 /** id картинок, на которые ссылается CSS. Подмена файлов игры считается отдельно. */
 export function imagesUsed(controls, values) {
   return new Set(controls.filter((c) => c.type === 'image' && c.emit.length && values[c.id]).map((c) => values[c.id].id));
+}
+
+/** { путь видео в игре: id файла }. */
+export function videosUsed(controls, values) {
+  const out = {};
+  for (const control of controls) {
+    if (control.type === 'video' && values[control.id]) out[control.game_path] = values[control.id].id;
+  }
+  return out;
+}
+
+/** Разметки худа, которые нужны выбранным видео: пути без расширения. */
+export function layoutsUsed(controls, values) {
+  return [...new Set(controls.filter((c) => c.type === 'video' && values[c.id]).map((c) => c.layout))].sort();
 }
 
 /** { путь текстуры игры без расширения: id картинки }. */

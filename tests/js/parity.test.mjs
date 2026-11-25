@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { generate, generateCompact, imagesUsed, replacedTextures } from '../../docs/js/build/cssgen.js';
+import { generate, generateCompact, imagesUsed, replacedTextures, videosUsed } from '../../docs/js/build/cssgen.js';
 import { sanitize } from '../../docs/js/build/values.js';
 import { controls, readJson } from './helpers.mjs';
 
@@ -21,6 +21,7 @@ test('списки картинок совпадают с Python', () => {
   cases.forEach((c, i) => {
     assert.deepEqual([...imagesUsed(all, c.clean)].sort(), c.images, `случай ${i}`);
     assert.deepEqual(replacedTextures(all, c.clean), c.replaced, `случай ${i}`);
+    assert.deepEqual(videosUsed(all, c.clean), c.videos, `случай ${i}`);
   });
 });
 

@@ -40,6 +40,11 @@ function controlVars(control, value, imageUrl) {
     case 'image': return imageVars(control, value, imageUrl);
     case 'outline': return { [`--${v}`]: outlineCss(value, control.preview_off) };
     case 'glow': return { [`--${v}`]: value.on ? `0 0 ${value.w * 2}px ${value.w}px ${value.c}` : 'none' };
+    // Видео вместо героя: в игре модель героя и затемнение под цифрами прячутся (см. cat_hud.portrait_video).
+    case 'video': return {
+      [`--${v}`]: value ? 'block' : 'none', [`--${v}-hide`]: value ? 'none' : 'block',
+      [`--${v}-fit`]: value ? { cover: 'cover', contain: 'contain', stretch: 'fill' }[value.fit] : 'cover',
+    };
     default: return {};
   }
 }
@@ -61,9 +66,30 @@ export function applyValues(stage, catalog, values, imageUrl) {
     }
   }
   clearCoveredShopPanels(stage, catalog, values);
+  playVideos(stage, catalog, values, imageUrl);
   showChosenTalentColor(stage, catalog, values);
   hideInsetShadows(stage, values);
   requestAnimationFrame(() => cullOutsideRow(stage));
+}
+
+// Адрес видео в CSS-переменную не положить: ставим его самому элементу <video data-video="id">.
+function playVideos(stage, catalog, values, videoUrl) {
+  for (const control of catalog) {
+    if (control.type !== 'video') continue;
+    const element = stage.querySelector(`video[data-video="${control.id}"]`);
+    if (!element) continue;
+    const value = values[control.id];
+    const url = value ? videoUrl(value.id) : '';
+    if (element.dataset.src === url) continue;
+    element.dataset.src = url;
+    if (url) {
+      element.src = url;
+      element.play().catch(() => { /* браузер не дал запустить сам: покажет первый кадр */ });
+    } else {
+      element.removeAttribute('src');
+      element.load();
+    }
+  }
 }
 
 // Блок ряда способностей (таланты, врождённая, аганим), унесённый целиком за край ряда, игра не рисует
@@ -296,6 +322,7 @@ function centerPanel(assets) {
       <i class="inset-shadow right" data-tab="ab" data-c="ab.inset">${img('ab.inset')}</i>
       <div class="por" data-b="por" data-tab="por">
         <div class="por-back" data-c="por.bg">${img('por.bg')}</div>
+        <video class="por-video" data-video="por.video" data-c="por.video" muted loop autoplay playsinline></video>
         <img class="por-hero" src="${asset('img/portrait.jpg')}" alt="" draggable="false">
         <i class="por-fade"></i>
         <div class="stats" data-c="stats.label">${statRows(ui)}</div>

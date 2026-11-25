@@ -4,6 +4,8 @@ import { isColorPopOpen } from './colorpop.js';
 import { debounce } from './dom.js';
 import { createExporter } from './exporter.js';
 import { createImageStore, fileToPng } from './images.js';
+import { fileToWebm, VideoError } from './video.js';
+import { MAX_VIDEO_BYTES } from './build/mod.js';
 import { startMotion } from './motion.js';
 import { createNav } from './nav.js';
 import { createPanel } from './panel.js';
@@ -126,12 +128,13 @@ async function start() {
   const groupOf = Object.fromEntries(groups.flatMap((g) => g.controls.map((c) => [c.id, g.id])));
   const defaults = Object.fromEntries(all.map((c) => [c.id, c.default]));
   const imageControls = all.filter((c) => c.type === 'image');
+  const fileControls = all.filter((c) => c.type === 'image' || c.type === 'video');
   const images = await createImageStore();
 
   /** Значения из файла, версии или хранилища → безопасные значения без ссылок на пропавшие картинки. */
   function cleanValues(raw) {
     const values = sanitize(all, raw);
-    imageControls.forEach((c) => { if (values[c.id] && !images.has(values[c.id].id)) values[c.id] = null; });
+    fileControls.forEach((c) => { if (values[c.id] && !images.has(values[c.id].id)) values[c.id] = null; });
     return values;
   }
 
@@ -193,13 +196,37 @@ async function start() {
     }
   }
 
+  const VIDEO_ERRORS = {
+    decode: t('Этот файл не получилось открыть. Подойдут гифка, PNG, JPG, mp4 или webm.'),
+    recorder: t('Этот браузер не умеет записывать видео. Открой сайт в Chrome, Edge или Firefox либо загрузи готовый webm.'),
+    long: t('Гифка длиннее 15 секунд: возьми покороче.'),
+  };
+
+  /** Файл человека → webm в хранилище: { id, w, h } или null (ошибку уже показали). */
+  async function uploadVideo(file, onProgress) {
+    try {
+      const made = await fileToWebm(file, onProgress);
+      if (made.blob.size > MAX_VIDEO_BYTES) {
+        toast(t('Видео больше 30 МБ: возьми покороче или поменьше.'));
+        return null;
+      }
+      const id = await images.add(made.blob, { video: true });
+      if (!images.durable()) toast(t('Видео добавлено, но этот браузер не даёт его сохранить: после закрытия вкладки оно пропадёт. Сохрани проект в файл.'));
+      return { id, w: made.width, h: made.height };
+    } catch (error) {
+      toast(error instanceof VideoError ? VIDEO_ERRORS[error.message] || VIDEO_ERRORS.decode : VIDEO_ERRORS.decode);
+      if (!(error instanceof VideoError)) console.error(error);
+      return null;
+    }
+  }
+
   const tinter = createTinter({ store, controls: imageControls, images, toast });
 
   // Стиль меняет цвета и формы, но оставляет загруженные картинки.
   function applyTheme(values) {
     const current = store.get();
     const next = { ...defaults, ...values };
-    imageControls.forEach((c) => { next[c.id] = current[c.id]; });
+    fileControls.forEach((c) => { next[c.id] = current[c.id]; });
     store.replace(next);
   }
 
@@ -234,7 +261,7 @@ async function start() {
   const panel = createPanel({
     root: $('panel'), store, areas, groups,
     tools: {
-      upload, uploads: images.uploads, imageUrl: images.url, applyTheme, originalSize: (path) => data.sizes?.[path] || null,
+      upload, uploads: images.uploads, imageUrl: images.url, applyTheme, uploadVideo, videoUrl: images.url, originalSize: (path) => data.sizes?.[path] || null,
       tint: tinter.tintOne, untinted: tinter.untinted, tintAll: tinter.tintAll, untintAll: tinter.untintAll,
     },
     onHover: hint,

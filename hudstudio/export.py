@@ -13,6 +13,7 @@ from pathlib import Path
 from . import catalog, resource
 from .assets import Assets, preview_manifest, shop_images, shop_layout
 from .config import Config, load_config
+from .pak import reader_args
 from .tools import run_tool
 
 STYLE_DIR = "panorama/styles/"
@@ -43,7 +44,7 @@ def png_size(path: Path) -> list:
 
 def _dump_raw(cfg: Config, paths: list, dest: Path, run) -> None:
     """Достаёт файлы из pak01 как есть, без расшифровки."""
-    code, log = run([cfg.decompiler, "-i", str(cfg.pak01), "-f", ",".join(paths), "-o", str(dest)])
+    code, log = run([cfg.decompiler, *reader_args(cfg), "-f", ",".join(paths), "-o", str(dest)])
     missing = [p for p in paths if not (dest / p).is_file()]
     if missing:
         raise FileNotFoundError(f"В pak01_dir.vpk нет файлов: {', '.join(missing)}\n{log}")

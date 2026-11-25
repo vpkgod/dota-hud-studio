@@ -16,6 +16,13 @@ const sizeText = (bytes) => (bytes < 1024 * 1024 ? t('{n} КБ', { n: Math.max(1
 export function createExporter({ dialog, store, controls, images, game, sizes = {}, prefs, changedCount }) {
   const styleCache = new Map();
 
+  async function loadLayout(path) {
+    // Готовую разметку собирает python3 -m hudstudio.layout и кладёт в docs/layout/.
+    const response = await fetch(`layout/${path.split('/').pop()}.vxml_c`);
+    if (!response.ok) throw new BuildError(t('Не удалось загрузить разметку худа для видео. Проверь интернет и попробуй ещё раз.'));
+    return new Uint8Array(await response.arrayBuffer());
+  }
+
   async function loadStyle(name) {
     if (!styleCache.has(name)) {
       const response = await fetch(`gamecss/${name}`);
@@ -27,6 +34,7 @@ export function createExporter({ dialog, store, controls, images, game, sizes = 
 
   function render() {
     const count = changedCount();
+    const hasVideo = controls.some((c) => c.type === 'video' && store.get()[c.id]);
     const saved = prefs.get();
     const slot = h('input', { type: 'number', class: 'numbox', min: MIN_SLOT, max: MAX_SLOT, value: saved.slot || DEFAULT_SLOT, 'aria-label': t('Номер файла') });
     const language = h('select', { 'aria-label': t('Язык игры') }, LANGUAGES.map(([id, title]) => h('option', { value: id, text: title, selected: id === (saved.language || (lang === 'en' ? 'english' : 'russian')) })));
@@ -55,7 +63,7 @@ export function createExporter({ dialog, store, controls, images, game, sizes = 
       status.className = 'status';
       status.textContent = t('Собираю худ…');
       try {
-        const mod = await buildMod({ controls, values: store.get(), slot: n, loadStyle, loadPng: images.bytes, sizes });
+        const mod = await buildMod({ controls, values: store.get(), slot: n, loadStyle, loadPng: images.bytes, loadVideo: images.bytes, loadLayout, sizes });
         downloadBlob(mod.name, new Blob([mod.bytes], { type: 'application/octet-stream' }));
         status.className = 'status good';
         status.textContent = t('Готово: {name}, {size}. Файл ушёл в папку загрузок.', { name: mod.name, size: sizeText(mod.bytes.length) });
@@ -99,7 +107,8 @@ export function createExporter({ dialog, store, controls, images, game, sizes = 
             h('li', { text: t('Перезапусти Dota 2.') })),
           h('p', { class: 'note' }, t('Худ не появился? Игра подключает папку языка, только когда запущена с этим языком. В Steam: Dota 2 → «Свойства» → «Параметры запуска», допиши '), launch, t(' и перезапусти игру.')),
           h('p', { class: 'note', text: t('Убрать худ: удали этот файл и перезапусти игру. Оригинальные файлы Dota не меняются.') }),
-          h('p', { class: 'note', text: t('Худ собран на файлах Dota сборки {build} ({date}). После крупного обновления игры собери его заново, иначе часть интерфейса может выглядеть по-старому.', { build: game.build || '?', date: game.date || t('дата неизвестна') }) })),
+          h('p', { class: 'note', text: t('Худ собран на файлах Dota сборки {build} ({date}). После крупного обновления игры собери его заново, иначе часть интерфейса может выглядеть по-старому.', { build: game.build || '?', date: game.date || t('дата неизвестна') }) }),
+          hasVideo ? h('p', { class: 'note', text: t('С видео в портрете мод заменяет весь нижний худ игры. Если после обновления Dota худ сломался, удали файл и собери его заново, когда сайт обновится.') }) : null),
         showCss, css));
     paintNames();
   }

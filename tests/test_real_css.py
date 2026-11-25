@@ -3,12 +3,14 @@ import re
 import unittest
 from pathlib import Path
 
-from hudstudio import catalog
+from hudstudio import catalog, layout
 from hudstudio.config import load_config
 
 
 # Панели, которые движок создаёт сам, поэтому в layout-файлах их нет.
 CREATED_BY_GAME_CODE = {"CircularXPProgress_FG", "CircularXPProgressBlur_FG", "PlaceholderText"}
+# Панели, которые добавляет наша разметка худа (hudstudio/layout.py), а не игра.
+OUR_PANELS = {layout.VIDEO_ID}
 
 
 def latest_styles():
@@ -29,7 +31,7 @@ class RealCssTest(unittest.TestCase):
                 text = (styles / target["file"]).read_text("utf8")
                 for selector in target["sel"]:
                     for token in re.findall(r"[#.][A-Za-z_][\w-]*", selector):
-                        if token not in text and token not in layout_classes:
+                        if token not in text and token not in layout_classes and token[1:] not in OUR_PANELS:
                             missing.append((cid, target["file"], token))
         self.assertEqual(missing, [])
 
@@ -43,7 +45,7 @@ class RealCssTest(unittest.TestCase):
             for target in control["emit"]:
                 for selector in target["sel"]:
                     missing += [(cid, t) for t in re.findall(r"#([A-Za-z_][\w-]*)", selector)
-                                if t not in ids and t not in CREATED_BY_GAME_CODE]
+                                if t not in ids and t not in CREATED_BY_GAME_CODE and t not in OUR_PANELS]
         self.assertEqual(missing, [])
 
     def test_every_image_preview_exists(self):

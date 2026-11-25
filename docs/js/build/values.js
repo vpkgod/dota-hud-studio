@@ -59,13 +59,24 @@ function image(raw) {
   return { ...clean, tint: cleanTint, base: isImageId(raw.base) ? raw.base : null };
 }
 
+const VIDEO_FITS = ['cover', 'contain', 'stretch'];
+const MAX_VIDEO_SIDE = 4096;
+
+/** Видео: { id, fit, w, h }; w×h — размер самого видео, нужен для «заполнить» и «вписать». */
+function video(raw) {
+  if (!isObject(raw) || !isImageId(raw.id)) return null;
+  const side = (n) => Number.isInteger(n) && n >= 1 && n <= MAX_VIDEO_SIDE;
+  if (!side(raw.w) || !side(raw.h)) return { id: raw.id, fit: 'stretch', w: 0, h: 0 };
+  return { id: raw.id, fit: VIDEO_FITS.includes(raw.fit) ? raw.fit : 'cover', w: raw.w, h: raw.h };
+}
+
 function shadow(raw, control) {
   const valid = isObject(raw) && typeof raw.on === 'boolean' && isNumber(raw.w) && isHex(raw.c);
   if (!valid) return control.default;
   return { on: raw.on, c: raw.c, w: roundHalfEven(clamp(raw.w, 1, 8)) };
 }
 
-const CLEANERS = { color, num, toggle, offset, image, fill, outline: shadow, glow: shadow };
+const CLEANERS = { color, num, toggle, offset, image, video, fill, outline: shadow, glow: shadow };
 
 /** Новый объект со всеми настройками каталога; плохое значение → значение по умолчанию. */
 export function sanitize(controls, raw) {
@@ -79,7 +90,7 @@ export function sanitize(controls, raw) {
   return result;
 }
 
-/** id всех картинок, которые нужны проекту: и готовых, и исходников перекраски. */
+/** id всех файлов (картинок и видео), которые нужны проекту: и готовых, и исходников перекраски. */
 export function imageIds(values) {
   const ids = new Set();
   for (const value of Object.values(values)) {

@@ -1,4 +1,4 @@
-// Сохранение проекта в файл и открытие из файла. Картинки лежат внутри файла.
+// Сохранение проекта в файл и открытие из файла. Картинки и видео лежат внутри файла.
 import { imageIds, sanitize } from './build/values.js';
 
 const FORMAT = 'hudstudio-1';
@@ -44,14 +44,16 @@ export async function readProject(file, controls, images) {
   if (!parsed || parsed.format !== FORMAT || typeof parsed.values !== 'object') throw new Error('format');
   const tints = new Set(Array.isArray(parsed.tints) ? parsed.tints : []);
   for (const [id, url] of Object.entries(parsed.images || {})) {
-    if (typeof url !== 'string' || !url.startsWith('data:image/png;base64,')) continue;
-    await images.add(await (await fetch(url)).blob(), { tint: tints.has(id) });
+    if (typeof url !== 'string') continue;
+    const video = url.startsWith('data:video/webm;base64,');
+    if (!video && !url.startsWith('data:image/png;base64,')) continue;
+    await images.add(await (await fetch(url)).blob(), { tint: tints.has(id), video });
   }
   const values = sanitize(controls, parsed.values);
   // Ссылки на картинки, которых в файле не оказалось, убираем: иначе сборка споткнётся.
   for (const control of controls) {
     const value = values[control.id];
-    if (control.type === 'image' && value && !images.has(value.id)) values[control.id] = null;
+    if ((control.type === 'image' || control.type === 'video') && value && !images.has(value.id)) values[control.id] = null;
   }
   return { name: typeof parsed.name === 'string' ? parsed.name.slice(0, 60) : '', values };
 }

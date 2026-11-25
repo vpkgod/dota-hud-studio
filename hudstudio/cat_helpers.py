@@ -77,6 +77,16 @@ def texture(cid, label, game_paths, hint=""):
             "originals": [f"{path}.png" for path in game_paths], "preview": f"{game_paths[0]}.png", "preview_fit": "contain", "fixed": True, "hint": hint}
 
 
+def video(cid, label, targets, layout, game_path, box):
+    """Видео за панелью. Его не задать стилем: нужна своя разметка худа (layout) с MoviePanel, которая
+    берёт файл game_path. Разметку собирает resourcecompiler (python3 -m hudstudio.layout), сайт кладёт её
+    в мод готовой. box — размер панели в игре [ширина, высота]: игра растягивает видео на всю MoviePanel,
+    поэтому «заполнить» и «вписать» задают ей размер, а лишнее обрезает родитель (overflow: clip).
+    У цели с fit=True к объявлениям добавляется размер видео."""
+    return {"id": cid, "label": label, "type": "video", "default": None, "emit": targets,
+            "layout": layout, "game_path": game_path, "box": list(box)}
+
+
 def outline(cid, label, target, preview_off=PREVIEW_TEXT_SHADOW):
     return {"id": cid, "label": label, "type": "outline", "default": NO_SHADOW,
             "emit": [{**target, "prop": "text-shadow"}], "preview_off": preview_off}
