@@ -68,6 +68,7 @@ export function applyValues(stage, catalog, values, imageUrl) {
   clearCoveredShopPanels(stage, catalog, values);
   playVideos(stage, catalog, values, imageUrl);
   showChosenTalentColor(stage, catalog, values);
+  markOwnEnemyColor(stage, catalog, values);
   hideInsetShadows(stage, values);
   requestAnimationFrame(() => cullOutsideRow(stage));
 }
@@ -121,6 +122,13 @@ function showChosenTalentColor(stage, catalog, values) {
   if (!control) return;
   if (values[control.id] === control.default) stage.style.removeProperty('--tree-chosen-shown');
   else stage.style.setProperty('--tree-chosen-shown', values[control.id]);
+}
+
+// Своё правило цвета врага в моде стоит после правила цветовой слепоты и побеждает его.
+function markOwnEnemyColor(stage, catalog, values) {
+  const control = catalog.find((c) => c.id === 'hp.enemy');
+  if (!control) return;
+  stage.classList.toggle('enemy-own', JSON.stringify(values[control.id]) !== JSON.stringify(control.default));
 }
 
 const asset = (path) => new URL(path, document.baseURI).href;

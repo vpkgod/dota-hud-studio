@@ -57,6 +57,8 @@
 .tb-hp > i, .tb-mp > i { display: block; height: 100%; }
 .radiant .tb-hp > i { background: var(--top-hpRadiant); }
 .dire .tb-hp > i { background: var(--top-hpDire); }
+/* Режим цветовой слепоты из настроек Dota */
+:is(.colorblind-on, .colorblind-peek) .radiant .tb-hp > i { background: var(--top-hpRadiantCb); }
 .tb-mp > i { background: linear-gradient(#5a86ea, #3c63c9 50%, #2b4a9f); }
 .tb-score { position: relative; width: 58px; height: 38px; margin-top: 7px; text-align: center; font-size: var(--top-scoreSize); line-height: 1.15; color: var(--top-score); text-shadow: var(--top-scoreOutline); z-index: 5; }
 .radiant .tb-score { margin-right: 4px; }
@@ -163,7 +165,10 @@
 .bar-l { position: relative; }
 .hp .bar-l { width: var(--hp-pct); background: var(--hp-fill); border-radius: var(--hp-radius); box-shadow: var(--hp-glow); overflow: hidden; }
 .hp .bar-r { flex: 1; background: var(--hp-track); border-radius: 0 var(--hp-radius) var(--hp-radius) 0; }
-.enemy .hp .bar-l { background: var(--hp-enemy); }
+/* В режиме цветовой слепоты правило игры красит и врага (сила селектора та же, оно ниже в файле), но своё правило врага
+   стоит в моде после него — тогда виден цвет врага (enemy-own). */
+:is(.colorblind-on, .colorblind-peek) .hp .bar-l { background: var(--hp-fillCb); }
+.enemy:not(.colorblind-on):not(.colorblind-peek) .hp .bar-l, .enemy.enemy-own .hp .bar-l { background: var(--hp-enemy); }
 .enemy .hp .bar-r { background: var(--hp-enemyTrack); }
 .mp .bar-l { width: var(--mp-pct); background: var(--mp-fill); border-radius: var(--mp-radius); box-shadow: var(--mp-glow); overflow: hidden; }
 .mp .bar-r { flex: 1; background: var(--mp-track); border-radius: 0 var(--mp-radius) var(--mp-radius) 0; }

@@ -30,6 +30,10 @@ def bars():
     return [
         *sub("Полоска здоровья",
              fill("hp.fill", "Цвет полоски", grad("#425d25", (.2, "#5BA539"), (.5, "#4D9030"), "#425d25"), hp_left),
+             # С режимом цветовой слепоты (настройки Dota) игра красит полоску своим правилом, которое сильнее
+             # обычного: без этой настройки свой цвет в этом режиме не виден. То же правило игра пишет и врагу.
+             fill("hp.fillCb", "Цвет в режиме цветовой слепоты", grad("#658fdf", (.2, "#a4caff"), (.5, "#3f6fcb"), "#2c56ab"),
+                  emit(HEALTH, ".Reborn.ColorBlindModeEnabled #HealthProgress .ProgressBarLeft")),
              image("hp.fillImg", "Картинка на заливке", [hp_left], "", "cover", game_sized=False),
              fill("hp.track", "Цвет пустой части", grad("#17200d", (.2, "#222e13"), (.5, "#1e2911"), "#17200d"), hp_right),
              num("hp.height", "Высота", 26, 8, 60, [{**emit(HEALTH, ".Reborn #HealthContainer"), "prop": "height"}]),

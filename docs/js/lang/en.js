@@ -87,6 +87,11 @@ export default {
   'Широкий (21:9)': 'Wide (21:9)',
   'Показать полоску врага': 'Show enemy health bar',
   'Зажат Alt: полоски героев сверху': 'Alt held: hero bars on top',
+  'Режим цветовой слепоты': 'Colorblind mode',
+  'Цвет в режиме цветовой слепоты': 'Color in colorblind mode',
+  'Силы Света в режиме цветовой слепоты': 'The Radiant in colorblind mode',
+  'Режим цветовой слепоты включается в настройках Dota. Игра тогда красит полоску своим цветом поверх обычного — и у врагов тоже. В превью включается в «Вид».': 'Colorblind mode is turned on in the Dota settings. The game then paints the bar with its own color over the usual one, enemies included. In the preview, turn it on under “View”.',
+  'Режим цветовой слепоты включается в настройках Dota. Полоски Сил Тьмы в нём не меняются. В превью включается в «Вид».': 'Colorblind mode is turned on in the Dota settings. Dire bars do not change in it. In the preview, turn it on under “View”.',
   'У героя есть аганим и осколок': 'Hero has Scepter and Shard',
   'Свой скриншот на фон': 'Use my screenshot as background',
   'Нажми на часть худа, чтобы открыть её настройку. Блоки можно перетаскивать мышью, колесо меняет масштаб. Превью приблизительное: итог смотри в игре.':

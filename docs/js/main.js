@@ -234,6 +234,8 @@ async function start() {
     stage.querySelectorAll('.hint').forEach((n) => n.classList.remove('hint'));
     // Полоски героев сверху в игре видны только с зажатым Alt: показываем их, пока настройка под курсором.
     stage.classList.toggle('alt-peek', Boolean(controlId) && controlId.startsWith('top.hp'));
+    // Цвета режима цветовой слепоты видны, пока их настройка под курсором (или режим включён в «Вид»).
+    stage.classList.toggle('colorblind-peek', controlId === 'hp.fillCb' || controlId === 'top.hpRadiantCb');
     // То же с аганимом: значки «есть скипетр» и «есть осколок» видны, пока их настройка под курсором.
     stage.classList.toggle('aghs-peek', controlId === 'aghs.scepterOn' || controlId === 'aghs.shardOn');
     // Фон подсказки виден только при наведении на кнопку талантов; подсветка одной стороны — когда доступна только она.
@@ -377,6 +379,7 @@ async function start() {
   wirePopover($('viewBtn'), $('viewMenu'));
   $('pvEnemy').addEventListener('change', (e) => stage.classList.toggle('enemy', e.target.checked));
   $('pvAlt').addEventListener('change', (e) => stage.classList.toggle('alt-held', e.target.checked));
+  $('pvColorblind').addEventListener('change', (e) => stage.classList.toggle('colorblind-on', e.target.checked));
   $('pvAghs').addEventListener('change', (e) => stage.classList.toggle('aghs-on', e.target.checked));
   $('pvNoItems').addEventListener('change', (e) => stage.classList.toggle('no-items', e.target.checked));
   $('pvHp').addEventListener('input', refreshStage);

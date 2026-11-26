@@ -51,8 +51,8 @@ def minimap():
     ]
 
 
-def _bar_color(cid, label, default, team):
-    selector = f"#{team} .TopBarHealthBar .ProgressBarLeft"
+def _bar_color(cid, label, default, team, mode=""):
+    selector = f"{mode}#{team} .TopBarHealthBar .ProgressBarLeft"
     return color(cid, label, default, emit(TOPBAR, selector, extra=["background-image: none"]), "background-color")
 
 
@@ -70,7 +70,10 @@ def topbar():
              num("top.radius", "Скругление", 0, 0, 18, [{**emit(TOPBAR, ".TopBarHeroImage"), "prop": "border-radius"}])),
         *sub("Полоски здоровья",
              _bar_color("top.hpRadiant", "Силы Света", "#339933", "TopBarRadiantTeam"),
-             _bar_color("top.hpDire", "Силы Тьмы", "#993333", "TopBarDireTeam")),
+             _bar_color("top.hpDire", "Силы Тьмы", "#993333", "TopBarDireTeam"),
+             # В режиме цветовой слепоты игра меняет только полоску Сил Света (картинка синего цвета, средний #4d8ea6).
+             _bar_color("top.hpRadiantCb", "Силы Света в режиме цветовой слепоты", "#4d8ea6", "TopBarRadiantTeam",
+                        ".ColorBlindModeEnabled ")),
         *sub("Положение", block("top", "DOTATopBar", file=TOPBAR)),
     ]
 
